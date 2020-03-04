@@ -1,1 +1,1 @@
-#[ModKit Wiki](../../wiki)
+Modded module for the game Keep Talking and Nobody Explodes.
