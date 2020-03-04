@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 615501dbe4f3fe94fbf4b564abb10237, type: 3}
+  m_Name: ModConfig
+  m_EditorClassIdentifier: 
+  id: roleReversal
+  title: Role Reversal
+  author: Emik
+  description: 'Perhaps they didn''t have enough printing paper since most of the
+    instructions lie within the module. Maybe they are environmentalists? Either way,
+    the defuser''s an expert now.
+
+
+    moduleId: roleReversal
+
+
+    HTML Manual: https://ktane.timwi.de/HTML/Role%20Reversal.html
+
+
+    Is there a bug? Do you have a question? Discord: @Emik#0001'
+  version: 1.0
+  outputFolder: build
+  previewImage: {fileID: 2800000, guid: 6dff3214601b3434fb6e968fdcace294, type: 3}

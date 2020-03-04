@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>Role Reversal — Keep Talking and Nobody Explodes Module</title>
+    <meta name="viewport" content="initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link rel="stylesheet" type="text/css" href="css/font.css">
+    <script src="js/ktane-utils.js"></script>
+</head>
+<body>
+    <div id="ManualContent">
+        <div class="section">
+            <div class="page page-bg-01">
+                <div class="page-header">
+                    <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                    <span class="page-header-section-title">Role Reversal</span>
+                </div>
+                <div class="page-content">
+                    <img src="img/Component/roleReversalRopes.svg" class="diagram">
+                    <h2>On the Subject of Role Reversal</h2>
+                    <p class="flavour-text">Defuser: "What do you mean that I'm the expert now?"</p>
+
+					<p class="appendix-reference">
+					See Appendix A for indicator identification reference.<br>
+					See Appendix B for battery identification reference.<br>
+					See Appendix W for color wheel identification reference.
+					</p>
+
+                    <p>The module consists of two screens, each with left and right buttons beside it for navigation for their respective 
+					screens. The top screen displays which wire is currently highlighted, pressing that screen will cut the wire that is 
+					currently displayed. The defuser has the instructions on which wire to cut with the help of the bottom screen, but is 
+					unable to see which wires they have because all of them lie inside the module. The expert will be able to figure out 
+					what wires they have with the help of the seed. Only one wire is required to be cut to solve this module.</p>
+
+                    <h3>Figuring out the wires</h3>
+					<p>The first line in the bottom screen will show a seed number. The module has 2-7 internal hidden wires which is 
+					determined by said number.</p>
+
+					<ul>
+                        <li>To get the amount of wires, take the seed and 
+						<a href="https://miniwebtool.com/modulo-calculator/">modulate it by 6.</a> 
+						<strong>Take the result and add 2 to get the wire count.</strong></li>
+
+						<p></p>
+						<li>To get the color of the wires, take the seed and convert it from 
+						<a href="http://www.unitconversion.org/numbers/base-10-to-base-6-conversion.html">base-10 to base-6.</a> 
+						<strong>Use the table below to convert the numbers into colors.</strong></li>
+
+						<ul>
+							<li>You'll recieve 7 digits after converting into base-6. In the event that you have any less than 7 members,
+							add 0's at the beginning of your list until you do. The first digit in that arrangement will correspond to the
+							first wire, the second digit will correspond to the second wire... <strong>Keep applying this rule until you
+							have reached the amount of wires calculated previously</strong>.</li>
+						</ul>
+					</ul>
+					
+                    <table class="center">
+						<tr>
+                            <th>Digit</th>
+							<td>0</td>
+							<td>1</td>
+							<td>2</td>
+							<td>3</td>
+							<td>4</td>
+							<td>5</td>
+                        </tr>
+						</tr>
+							<th>Color</th>
+							<td>Red</td>
+							<td>Orange</td>
+							<td>Yellow</td>
+							<td>Green</td>
+							<td>Blue</td>
+							<td>Purple</td>
+						<tr>
+					</table>
+					
+					<p></p>
+					<p>When you have figured out the internal wiring of the module, the defuser can press the bottom left and right buttons
+					which will cycle through each list of instructions individually or press the bottom screen to skip to the next section.
+					Sections are sorted by wire length which all contain their own exceptions. Exceptions must be followed in order to get
+					the correct wire to cut.</p>	
+				</div>
+                <div class="page-footer relative-footer">Page 1 of 2</div>
+            </div>
+			<div class="page page-bg-02">
+                <div class="page-header">
+                    <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                    <span class="page-header-section-title">Appendix W</span>
+                </div>
+                <div class="page-content">
+                    <h2>Appendix W: Color Wheel Identification Reference</h2>
+                    <p>The module may ask the defuser to cut a specific type of wire, if unfamiliar, use this image to identify which terms fall under which colored wires:</p>
+
+					<img style='width: 100%' src="img/ColorWheel.png" />
+
+                    <table class="center">
+						<tr>
+                            <th>Word</th>
+							<th>Definition</th>
+                        </tr>
+						</tr>
+							<td>Complementary</td>
+							<td>2 colors directly opposite of each other on the color wheel, as shown with the <strong>gray</strong> lines.</td>
+						<tr>
+						</tr>
+							<td>Triadic</td>
+							<td>3 colors forming an equilateral triangle on the color wheel, as shown with the <strong>cyan</strong> lines.</td>
+						<tr>
+					</table>
+				</div>
+				<div class="page-footer relative-footer">Page 2 of 2</div>
+        </div>
+    </div>
+</body>
+</html>
