@@ -15,8 +15,10 @@ public class roleReversal : MonoBehaviour
     public TextMesh screenText, submitText;
     public Component background;
 
+    //internal Manual manual = new Manual();
+
     private bool _lightsOn = false, _isSolved = false, _displayWin = false;
-    private sbyte _wireSelected = 0, _correctWire = 0, _instructionsIndex = 0, _frames = 0;
+    private sbyte _wireSelected = 0, _correctWire = 0, _frames = 0, _instructionsIndex = 1;
     private int _moduleId = 0, _seed = 0;
     private string _currentText = "";
 
@@ -80,15 +82,20 @@ public class roleReversal : MonoBehaviour
 
         else
         {
-            //speed = 1.25 characters per frame
-            if (screenText.text.Length < _displayText.Count() - 1 && _frames == 0)
+            for (int i = 0; i < 2; i++)
             {
-                screenText.text = screenText.text.Insert(screenText.text.Length, _displayText[screenText.text.Length].ToString());
-                screenText.text = screenText.text.Insert(screenText.text.Length, _displayText[screenText.text.Length].ToString());
-            }
+                if (i == 1 && _frames != 0)
+                    continue;
 
-            else if (screenText.text.Length < _displayText.Count())
-                screenText.text = screenText.text = screenText.text.Insert(screenText.text.Length, _displayText[screenText.text.Length].ToString());
+                if (screenText.text.Length < _displayText.Count())
+                {
+                    if (_displayText[screenText.text.Length] == '§')
+                        screenText.text = screenText.text.Insert(screenText.text.Length, "\n");
+
+                    else
+                        screenText.text = screenText.text.Insert(screenText.text.Length, _displayText[screenText.text.Length].ToString());
+                }
+            }
         }
 
     }
@@ -135,9 +142,10 @@ public class roleReversal : MonoBehaviour
         Debug.LogFormat("");
 
         //_seed!
-        //generate seed and flip to random instruction page
+        //generate seed
         _seed = Random.Range(0, 279936);
-        _instructionsIndex = (sbyte)(Random.Range(0, 45));
+
+        //_instructions = manual.GenerateManual();
 
         //meme seed for thumbnail
         //_seed = 279935;
@@ -186,38 +194,25 @@ public class roleReversal : MonoBehaviour
             case 2:
                 //bottom screen, previous instruction
                 _instructionsIndex--;
-                _instructionsIndex += 45;
-                _instructionsIndex %= 45;
+                _instructionsIndex += (sbyte)_instructions.Length;
+                _instructionsIndex %= (sbyte)_instructions.Length;
                 DisplayScreen();
                 break;
 
             case 3:
                 //buttom screen, next instruction
                 _instructionsIndex++;
-                _instructionsIndex += 45;
-                _instructionsIndex %= 45;
+                _instructionsIndex += (sbyte)_instructions.Length;
+                _instructionsIndex %= (sbyte)_instructions.Length;
                 DisplayScreen();
                 break;
 
             case 4:
                 //skip to the correct sections
-                if (_instructionsIndex < 5)
-                    _instructionsIndex = 5;
-
-                else if (_instructionsIndex < 11)
-                    _instructionsIndex = 11;
-
-                else if (_instructionsIndex < 18)
-                    _instructionsIndex = 18;
-
-                else if (_instructionsIndex < 26)
-                    _instructionsIndex = 26;
-
-                else if (_instructionsIndex < 35)
-                    _instructionsIndex = 35;
-
-                else
-                    _instructionsIndex = 0;
+                _instructionsIndex /= 9;
+                _instructionsIndex++;
+                _instructionsIndex *= 9;
+                _instructionsIndex %= (sbyte)_instructions.Length;
 
                 DisplayScreen();
                 break;
@@ -289,11 +284,50 @@ public class roleReversal : MonoBehaviour
         {
             //2 wires!
             case 2:
+                //if first is secondary and both triadic
+                if (_convertedSeed[0] % 2 == 1 && Mathf.Abs((float)(char.GetNumericValue(_convertedSeed[0]) - char.GetNumericValue(_convertedSeed[1]))) == 2 || Mathf.Abs((float)(char.GetNumericValue(_convertedSeed[0]) - char.GetNumericValue(_convertedSeed[1]))) == 4)
+                {
+                    if (_convertedSeed[0] < _convertedSeed[0])
+                    {
+                        _correctWire = 1;
+                        Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If both are triadic): True, cut wire 1.", _moduleId);
+                    }
+
+                    else
+                    {
+                        _correctWire = 2;
+                        Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If both are triadic): True, cut wire 2.", _moduleId);
+                    }
+                }
+
+                //if second wire is yellow
+                if (_convertedSeed[1] == '2')
+                {
+                    if (_convertedSeed[0] == '2')
+                    {
+                        _correctWire = 1;
+                        Debug.LogFormat("[Role Reversal #{0}] Condition 3 (If second wire is yellow): True, cut wire 1.", _moduleId);
+                    }
+
+                    else
+                    {
+                        _correctWire = 2;
+                        Debug.LogFormat("[Role Reversal #{0}] Condition 3 (If second wire is yellow): True, cut wire 2.", _moduleId);
+                    }
+                }
+
                 //if wire colors are the same
                 if (_convertedSeed[0] == _convertedSeed[1])
                 {
                     _correctWire = 2;
-                    Debug.LogFormat("[Role Reversal #{0}] Exception 1 (If both are the same): True, cut wire 2.", _moduleId);
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 4 (If both are the same): True, cut wire 2.", _moduleId);
+                }
+
+                //if 0 batteries
+                else if (Info.GetBatteryCount() == 0)
+                {
+                    _correctWire = 1;
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 5 (If there are 0 batteries): True, cut wire 1.", _moduleId);
                 }
 
                 //if the wire colors are complementary
@@ -305,15 +339,13 @@ public class roleReversal : MonoBehaviour
                     else
                         _correctWire = 1;
 
-                    Debug.LogFormat("[Role Reversal #{0}] Exception 2 (If both are complementary): True, cut wire {1}.", _moduleId, _correctWire);
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 6 (If both are complementary): True, cut wire {1}.", _moduleId, _correctWire);
                 }
 
-                //if the wire colors are triadic
-                else if (Mathf.Abs((float)(char.GetNumericValue(_convertedSeed[0]) - char.GetNumericValue(_convertedSeed[1]))) == 2 || Mathf.Abs((float)(char.GetNumericValue(_convertedSeed[0]) - char.GetNumericValue(_convertedSeed[1]))) == 4)
+                else if (_convertedSeed[0] > _convertedSeed[1])
                 {
-                    _correctWire = 1;
-
-                    Debug.LogFormat("[Role Reversal #{0}] Exception 3 (If both are triadic): True, cut wire 1.", _moduleId);
+                    _correctWire = 2;
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 7 (Otherwise): True, cut wire 2.", _moduleId);
                 }
 
                 //otherwise
@@ -325,79 +357,88 @@ public class roleReversal : MonoBehaviour
                     else
                         _correctWire = 1;
 
-                    Debug.LogFormat("[Role Reversal #{0}] Exception 4 (Otherwise): True, cut wire {1}.", _moduleId, _correctWire);
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 8 (Otherwise): True, cut wire {1}.", _moduleId, _correctWire);
                 }
                 break;
 
             //3 wires!
             case 3:
+                //if serial is even and one purple
+                if (_purpleWires.Count == 1 && Info.GetSerialNumberNumbers().First() % 2 == 0)
+                {
+                    _correctWire = (sbyte)(_purpleWires[0] + 1);
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If there is only one wire matching the module's color): True, cut wire {1}.", _moduleId, _correctWire);
+                    break;
+                }
+
+                //if all wires share color
+                else if (_convertedSeed.Distinct().Count() == 1)
+                {
+                    _correctWire = 2;
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 3 (If all wires share color): True, cut wire {1}.", _moduleId, _correctWire);
+                    break;
+                }
+
+                //if there is only 1 of this module
+                else if (moduleCount != 1)
+                {
+                    _correctWire = 3;
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 4 (If only one of this module is present): True, cut wire 3.", _moduleId);
+                    break;
+                }
+
+                //if warm color is to the left of cold color
+                for (int i = 0; i < _convertedSeed.Count - 1; i++)
+                    if (char.GetNumericValue(_convertedSeed[i]) <= 2 && char.GetNumericValue(_convertedSeed[i + 1]) >= 3)
+                        for (int j = _convertedSeed.Count - 2; j > 0; j--)
+                            if (char.GetNumericValue(_convertedSeed[j + 1]) >= 3)
+                            {
+                                _correctWire = (sbyte)(char.GetNumericValue(_convertedSeed[j]) + 1);
+                                Debug.LogFormat("[Role Reversal #{0}] Condition 5 (If a warm color is to the left of a cold color): True, cut wire {1}.", _moduleId, _correctWire);
+                                break;
+                            }
+
+                if (_correctWire != 0)
+                    break;
+
+                //if serial contains letters found in module name
+                if (Info.GetSerialNumberLetters().Any("ROLEVSAL".Contains))
+                {
+                    _correctWire = 1;
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 6 (If serial contains module name's letters): True, cut wire 1.", _moduleId);
+                    break;
+                }
+
                 //if only two wires share color
-                if (_convertedSeed.Count - 1 == _convertedSeed.Distinct().Count())
+                else if (_convertedSeed.Count - 1 == _convertedSeed.Distinct().Count())
                     for (int i = 0; i < _wires.Count; i++)
                     {
                         if (_wires[i].Count == 1)
                         {
                             _correctWire = (sbyte)(_wires[i][0] + 1);
-                            Debug.LogFormat("[Role Reversal #{0}] Exception 1 (If only two wires share color): True, cut wire {1}.", _moduleId, _correctWire);
+                            Debug.LogFormat("[Role Reversal #{0}] Condition 7 (If only two wires share color): True, cut wire {1}.", _moduleId, _correctWire);
                             break;
                         }
                     }
 
-                if (_correctWire == 0)
+                if (_correctWire != 0)
+                    break;
+
+                //otherwise
+                else
                 {
-                    //if there is only 1 of this module
-                    if (moduleCount == 1)
-                    {
-                        _correctWire = 3;
-                        Debug.LogFormat("[Role Reversal #{0}] Exception 2 (If only one of this module is present): True, cut wire 3.", _moduleId);
-                        break;
-                    }
-
-                    for (int i = 0; i < _convertedSeed.Count - 1; i++)
-                        //if warm color is to the left of cold color
-                        if (char.GetNumericValue(_convertedSeed[i]) <= 2 && char.GetNumericValue(_convertedSeed[i + 1]) >= 3)
-                            for (int j = _convertedSeed.Count - 2; j > 0; j--)
-                                if (char.GetNumericValue(_convertedSeed[j + 1]) >= 3)
-                                {
-                                    _correctWire = (sbyte)(char.GetNumericValue(_convertedSeed[j]) + 1);
-                                    Debug.LogFormat("[Role Reversal #{0}] Exception 3 (If a warm color is to the left of a cold color): True, cut wire {1}.", _moduleId, _correctWire);
-                                    break;
-                                }
-
-                    if (_correctWire == 0)
-                    {
-                        //if serial contains letters found in module name
-                        if (Info.GetSerialNumberLetters().Any("ROLEVSAL".Contains))
-                        {
-                            _correctWire = 1;
-                            Debug.LogFormat("[Role Reversal #{0}] Exception 4 (If serial contains module name's letters): True, cut wire 1.", _moduleId);
-                            break;
-                        }
-
-                        //otherwise
-                        else
-                        {
-                            _correctWire = 1;
-                            Debug.LogFormat("[Role Reversal #{0}] Exception 5 (Otherwise): True, cut wire 1.", _moduleId);
-                        }
-                    }
+                    _correctWire = 1;
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 8 (Otherwise): True, cut wire 1.", _moduleId);
                 }
                 break;
 
             //4 wires!
             case 4:
-                //if first wire is red
-                if (_convertedSeed[0] == '0')
+                if (Info.GetIndicators().Count() <= 2 && _convertedSeed[0] == '0')
                 {
+                    //if first wire is red
                     _correctWire = (sbyte)(_redWires[_redWires.Count - 1] + 1);
-                    Debug.LogFormat("[Role Reversal #{0}] Exception 1 (If first wire is red): True, cut wire {1}.", _moduleId, _correctWire);
-                }
-
-                //if less than 1 minute is left
-                else if (Info.GetTime() < 60)
-                {
-                    _correctWire = 1;
-                    Debug.LogFormat("[Role Reversal #{0}] Exception 2 (If less than 1 minute is left): True, cut wire 1.", _moduleId);
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If first wire is red): True, cut wire {1}.", _moduleId, _correctWire);
                 }
 
                 //if all wires are unique
@@ -408,10 +449,52 @@ public class roleReversal : MonoBehaviour
                         if (_convertedSeed[i] == '1' || _convertedSeed[i] == '4' || _convertedSeed[i] == '5')
                         {
                             _correctWire = (sbyte)(char.GetNumericValue(_convertedSeed[i]) + 1);
-                            Debug.LogFormat("[Role Reversal #{0}] Exception 3 (If all wires are unique): True, cut wire {1}.", _moduleId, _correctWire);
+                            Debug.LogFormat("[Role Reversal #{0}] Condition 3 (If all wires are unique): True, cut wire {1}.", _moduleId, _correctWire);
                             break;
                         }
                     }
+                }
+
+                //if less than 1 minute is left
+                else if (Info.GetTime() < 60)
+                {
+                    _correctWire = 1;
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 4 (If less than 1 minute is left): True, cut wire 1.", _moduleId);
+                    break;
+                }
+
+                //if all wires are sorted
+                for (int i = 0; i < _convertedSeed.Count - 1; i++)
+                {
+                    //they aren't sorted
+                    if (_convertedSeed[i] > _convertedSeed[i + 1])
+                        break;
+
+                    //they are sorted
+                    if (i == _convertedSeed.Count - 2)
+                    {
+                        //linear search
+                        for (int j = 0; j < _convertedSeed.Count; j++)
+                        {
+                            //if cold, or not unique
+                            if (_convertedSeed[i] >= 3 || _wires[(int)char.GetNumericValue(_convertedSeed[i])].Count > 1)
+                            {
+                                _correctWire = (sbyte)(j + 1);
+                                Debug.LogFormat("[Role Reversal #{0}] Condition 5 (If wires are sorted): True, cut wire {1}.", _moduleId, _convertedSeed);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (_correctWire != 0)
+                    break;
+
+                //if 7 or less modules are on the bomb
+                if (Info.GetModuleIDs().Count <= 7)
+                {
+                    _correctWire = (sbyte)(Info.GetModuleIDs().Count + 1);
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 6 (If 7 or less modules are on the bomb): True, cut wire {1}.", _moduleId, _correctWire);
                 }
 
                 //if first wire is a warm color
@@ -422,24 +505,17 @@ public class roleReversal : MonoBehaviour
                         if (char.GetNumericValue(_convertedSeed[i]) <= 2)
                         {
                             _correctWire = (sbyte)(i + 1);
-                            Debug.LogFormat("[Role Reversal #{0}] Exception 4 (If first wire is a warm color): True, cut wire {1}.", _moduleId, _correctWire);
+                            Debug.LogFormat("[Role Reversal #{0}] Condition 7 (If first wire is a warm color): True, cut wire {1}.", _moduleId, _correctWire);
                             break;
                         }
                     }
-                }
-
-                //if 10+ modules are on the bomb
-                else if (Info.GetModuleIDs().Count >= 10)
-                {
-                    _correctWire = 3;
-                    Debug.LogFormat("[Role Reversal #{0}] Exception 5 (If 10+ modules are on the bomb): True, cut wire 3.", _moduleId);
                 }
 
                 //otherwise
                 else
                 {
                     _correctWire = 2;
-                    Debug.LogFormat("[Role Reversal #{0}] Exception 6 (Otherwise): True, cut wire 2.", _moduleId);
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 8 (Otherwise): True, cut wire 2.", _moduleId);
                 }
                 break;
 
@@ -449,7 +525,7 @@ public class roleReversal : MonoBehaviour
                 if (!_convertedSeed.Contains('0') && _convertedSeed.Contains('1'))
                 {
                     _correctWire = (sbyte)(_orangeWires[0] + 1);
-                    Debug.LogFormat("[Role Reversal #{0}] Exception 2 (If there are any orange wires): True, cut wire 1.", _moduleId, _correctWire);
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If there are any orange wires): True, cut wire 1.", _moduleId, _correctWire);
                 }
 
                 else
@@ -460,7 +536,7 @@ public class roleReversal : MonoBehaviour
                         if (_convertedSeed[i] == '2' && _convertedSeed[i + 1] == '3')
                         {
                             _correctWire = (sbyte)(_yellowWires[0] + 1); ;
-                            Debug.LogFormat("[Role Reversal #{0}] Exception 3 (If yellow wire to the left of green wire): True, cut wire {1}.", _moduleId, _correctWire);
+                            Debug.LogFormat("[Role Reversal #{0}] Condition 3 (If yellow wire to the left of green wire): True, cut wire {1}.", _moduleId, _correctWire);
                             break;
                         }
 
@@ -468,126 +544,128 @@ public class roleReversal : MonoBehaviour
                         if (_convertedSeed[i] == '3' && _convertedSeed[i + 1] == '2')
                         {
                             _correctWire = (sbyte)(_greenWires[0] + 1);
-                            Debug.LogFormat("[Role Reversal #{0}] Exception 4 (If yellow wire to the right of green wire): True, cut wire {1}.", _moduleId, _correctWire);
+                            Debug.LogFormat("[Role Reversal #{0}] Condition 4 (If yellow wire to the right of green wire): True, cut wire {1}.", _moduleId, _correctWire);
                             break;
                         }
                     }
 
-                    //if correctWire hasn't been set
-                    if (_correctWire == 0)
-                    {
-                        //really only for purple wires
-                        GetWires();
-
-                        //if one purple wire exists
-                        if (_purpleWires.Count == 1)
-                        {
-                            _correctWire = (sbyte)(_purpleWires[0] + 1);
-                            Debug.LogFormat("[Role Reversal #{0}] Exception 5 (If one purple wire exists): True, cut wire {1}.", _moduleId, _correctWire);
-                        }
-
-                        //if any indicators are off
-                        else if (Info.GetOffIndicators().Count() > 0)
-                        {
-                            _correctWire = 3;
-                            Debug.LogFormat("[Role Reversal #{0}] Exception 6 (If any off indicators are off): True, cut wire 3.", _moduleId);
-                        }
-
-                        //otherwise
-                        else
-                        {
-                            _correctWire = 2;
-                            Debug.LogFormat("[Role Reversal #{0}] Exception 7 (Otherwise): True, cut wire 2.", _moduleId);
-                        }
-                    }
-                }
-                break;
-
-            //6 wires!
-            case 6:
-                //if there aren't 2 numbers in serial
-                if (Info.GetSerialNumberNumbers().Count() != 2)
-                {
-                    //if serial has a vowel
-                    if (Info.GetSerialNumberLetters().Any("AEIOU".Contains))
-                    {
-                        _correctWire = 6;
-                        Debug.LogFormat("[Role Reversal #{0}] Exception 3 (If serial has a vowel): True, cut wire 6.", _moduleId);
+                    //if correctWire has been set
+                    if (_correctWire != 0)
                         break;
+
+                    //if there is CAR or FRK label
+                    if (Info.GetIndicators().Any("CAR".Contains) || Info.GetIndicators().Any("FRK".Contains))
+                    {
+                        _correctWire = (sbyte)((Info.GetOnIndicators().Count() % 7) + 1);
+                        Debug.LogFormat("[Role Reversal #{0}] Condition 5 (If there is CAR or FRK label): True, cut wire {1}.", _moduleId, _correctWire);
                     }
 
-                    //if all primary colors exist
-                    else if (_convertedSeed.Contains('0') && _convertedSeed.Contains('2') && _convertedSeed.Contains('4'))
-                        for (int i = 0; i < _convertedSeed.Count; i++)
-                            if (_convertedSeed[i] == 1 || _convertedSeed[i] == 4 || _convertedSeed[i] == 5)
-                            {
-                                _correctWire = (sbyte)(i + 1);
-                                Debug.LogFormat("[Role Reversal #{0}] Exception 2 (If all primary colors exist): True, cut wire {1}.", _moduleId, _correctWire);
-                                break;
-                            }
-                }
-
-                if (_correctWire == 0)
-                {
-                    byte pairs = 0;
-                    byte triplets = 0;
-
-                    //if 2 pairs or 1 triplet
-                    for (int i = 0; i < _wires.Count; i++)
+                    //if one purple wire exists
+                    else if (_purpleWires.Count == 1)
                     {
-                        //check for pairs
-                        if (_wires[i].Count == 2)
-                            pairs++;
-
-                        //check for triplets
-                        else if (_wires[i].Count == 3)
-                            triplets++;
+                        _correctWire = (sbyte)(_purpleWires[0] + 1);
+                        Debug.LogFormat("[Role Reversal #{0}] Condition 6 (If one purple wire exists): True, cut wire {1}.", _moduleId, _correctWire);
                     }
 
-                    //if there is a triplet, or 2 pairs were detected previously
-                    if (pairs == 2 || triplets == 1)
+                    //if any indicators are off
+                    else if (Info.GetOffIndicators().Count() > 0)
                     {
-                        /*
-                         * runs through the order of the wires, based on what numerical value is in each wire,
-                         * it runs through the index of _wires, which will check whether there is one member
-                         * the specified color. if not, it continues through the list until it finds one.
-                        */
-                        for (int i = 0; i < _convertedSeed.Count; i++)
-                            if (_wires[(int)char.GetNumericValue(_convertedSeed[i])].Count == 1)
-                            {
-                                _correctWire = (sbyte)(_wires[System.Convert.ToSByte(char.GetNumericValue(_convertedSeed[i]))][0] + 1);
-                                Debug.LogFormat("[Role Reversal #{0}] Exception 4 (If only 2 pairs or only 1 triplet exist): True, cut wire {1}.", _moduleId, _correctWire);
-                                break;
-                            }
-                    }
-
-                    //if seed is divisible by 3
-                    else if (_seed % 3 == 0)
-                    {
-                        _correctWire = 4;
-                        Debug.LogFormat("[Role Reversal #{0}] Exception 5 (If seed is divisible by 3): True, cut wire 4.", _moduleId);
-                    }
-
-                    //if more than 600 seconds remain
-                    else if (Info.GetTime() > 600)
-                    {
-                        _correctWire = 2;
-                        Debug.LogFormat("[Role Reversal #{0}] Exception 6 (If more than 10 minutes remain): True, cut wire 2.", _moduleId);
-                    }
-
-                    //if seed is even
-                    else if (_seed % 2 == 0)
-                    {
-                        _correctWire = 5;
-                        Debug.LogFormat("[Role Reversal #{0}] Exception 7 (If seed is even): True, cut wire 5.", _moduleId);
+                        _correctWire = 3;
+                        Debug.LogFormat("[Role Reversal #{0}] Condition 7 (If any off indicators are off): True, cut wire 3.", _moduleId);
                     }
 
                     //otherwise
                     else
                     {
-                        _correctWire = 3;
-                        Debug.LogFormat("[Role Reversal #{0}] Exception 8 (Otherwise): True, cut wire 3.", _moduleId);
+                        _correctWire = 2;
+                        Debug.LogFormat("[Role Reversal #{0}] Condition 8 (Otherwise): True, cut wire 2.", _moduleId);
                     }
+
+                }
+                break;
+
+            //6 wires!
+            case 6:
+                //if there aren't 2 numbers in serial and if there is a vowel
+                if (Info.GetSerialNumberNumbers().Count() != 2 && Info.GetSerialNumberLetters().Any("AEIOU".Contains))
+                {
+                    _correctWire = 6;
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If serial has a vowel): True, cut wire 6.", _moduleId);
+                    break;
+                }
+
+                //Debug.LogFormat("{0} {1} {2}", _redWires.Count, _yellowWires.Count, _blueWires.Count);
+                //if all primary colors exist
+                if (_redWires.Count >= 1 && _yellowWires.Count >= 1 && _blueWires.Count >= 1)
+                    for (int i = 0; i < _convertedSeed.Count; i++)
+                        if (_convertedSeed[i] == '1' || _convertedSeed[i] == '4' || _convertedSeed[i] == '5')
+                        {
+                            _correctWire = (sbyte)(i + 1);
+                            Debug.LogFormat("[Role Reversal #{0}] Condition 3 (If all primary colors exist): True, cut wire {1}.", _moduleId, _correctWire);
+                            break;
+                        }
+
+                if (_correctWire != 0)
+                    break;
+
+                byte pairs = 0;
+                byte triplets = 0;
+
+                //if 2 pairs or 1 triplet
+                for (int i = 0; i < _wires.Count; i++)
+                {
+                    //check for pairs
+                    if (_wires[i].Count == 2)
+                        pairs++;
+
+                    //check for triplets
+                    else if (_wires[i].Count == 3)
+                        triplets++;
+                }
+
+                //if seed is divisible by 3
+                if (_seed % 3 == 0)
+                {
+                    _correctWire = 4;
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 4 (If seed is divisible by 3): True, cut wire 4.", _moduleId);
+                }
+
+                //if there is a triplet, or 2 pairs were detected previously
+                else if (pairs == 2 || triplets == 1)
+                {
+                    /*
+                     * runs through the order of the wires, based on what numerical value is in each wire,
+                     * it runs through the index of _wires, which will check whether there is one member
+                     * the specified color. if not, it continues through the list until it finds one.
+                    */
+                    for (int i = 0; i < _convertedSeed.Count; i++)
+                        if (_wires[(int)char.GetNumericValue(_convertedSeed[i])].Count == 1)
+                        {
+                            _correctWire = (sbyte)(_wires[System.Convert.ToSByte(char.GetNumericValue(_convertedSeed[i]))][0] + 1);
+                            Debug.LogFormat("[Role Reversal #{0}] Condition 5 (If only 2 pairs or only 1 triplet exist): True, cut wire {1}.", _moduleId, _correctWire);
+                            break;
+                        }
+                }
+
+                //if more than 600 seconds remain
+                else if (Info.GetTime() > 600)
+                {
+                    _correctWire = 2;
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 6 (If more than 10 minutes remain): True, cut wire 2.", _moduleId);
+                }
+
+                //if seed is even
+                else if (_seed % 2 == 0)
+                {
+                    _correctWire = 5;
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 7 (If seed is even): True, cut wire 5.", _moduleId);
+                }
+
+                //otherwise
+                else
+                {
+                    _correctWire = 3;
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 8 (Otherwise): True, cut wire 3.", _moduleId);
                 }
                 break;
 
@@ -596,73 +674,74 @@ public class roleReversal : MonoBehaviour
                 //if there aren't more unlit than lit
                 if (Info.GetOnIndicators().Count() < Info.GetOffIndicators().Count())
                 {
-                    //for cold colors
-                    GetWires();
-
-                    //if first, fourth, or last share any same color
-                    if (_convertedSeed[0] == _convertedSeed[3] || _convertedSeed[0] == _convertedSeed[6] || _convertedSeed[3] == _convertedSeed[6])
-                    {
-                        _correctWire = 4;
-                        Debug.LogFormat("[Role Reversal #{0}] Exception 2 (If first, fourth or last wire share any same colors): True, cut wire 4.", _moduleId, _correctWire);
-                        break;
-                    }
-
-                    //if there are 2 blue wires
-                    else if (_blueWires.Count >= 2)
-                    {
-                        _correctWire = (sbyte)(_blueWires[0] + 2);
-                        Debug.LogFormat("[Role Reversal #{0}] Exception 3 (If there are 2 blue wires): True, cut wire {1}.", _moduleId, _correctWire);
-                        break;
-                    }
-
                     //if there aren't 2 purple wires
-                    else if (_purpleWires.Count != 2)
+                    if (_purpleWires.Count != 2)
                     {
                         _correctWire = 7;
-                        Debug.LogFormat("[Role Reversal #{0}] Exception 4 (If there aren't 2 purple wires): True, cut wire 7.", _moduleId);
+                        Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If there aren't 2 purple wires): True, cut wire 7.", _moduleId);
                         break;
                     }
                 }
 
-                //for every wire
-                GetWires();
+                if (_correctWire != 0)
+                    break;
 
-                //if there is CAR or FRK label
-                if (Info.GetIndicators().Any("CAR".Contains) || Info.GetIndicators().Any("FRK".Contains))
+                //if there are 2 blue wires
+                if (_blueWires.Count >= 3)
                 {
-                    _correctWire = (sbyte)((Info.GetOnIndicators().Count() % 7) + 1);
-                    Debug.LogFormat("[Role Reversal #{0}] Exception 5 (If there is CAR or FRK label): True, cut wire {1}.", _moduleId, _correctWire);
+                    _correctWire = (sbyte)(_blueWires[1] + 2);
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 3 (If there are 3 blue wires): True, cut wire {1}.", _moduleId, _correctWire);
+                    break;
                 }
 
                 //if serial has a matching number to red wires
                 else if (Info.GetSerialNumber().Contains(System.Convert.ToChar(_redWires.Count + 48)))
                 {
                     _correctWire = 6;
-                    Debug.LogFormat("[Role Reversal #{0}] Exception 6 (If the serial has a matching number to the number of red wires present): True, cut wire 6.", _moduleId);
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 4 (If the serial has a matching number to the number of red wires present): True, cut wire 6.", _moduleId);
                 }
 
                 //if there are less batteries than orange wires
                 else if (Info.GetBatteryCount() < _orangeWires.Count)
                 {
                     _correctWire = (sbyte)(_orangeWires[_orangeWires.Count - 1] + 1);
-                    Debug.LogFormat("[Role Reversal #{0}] Exception 7 (If there are less batteries than orange wires): True, cut wire {1}.", _moduleId, _correctWire);
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 5 (If there are less batteries than orange wires): True, cut wire {1}.", _moduleId, _correctWire);
                 }
 
                 else
                 {
-                    //if 3 or more wires share the same color
+                    //if 4 or more wires share the same color
                     for (int i = 0; i < _wires.Count; i++)
-                        if (_wires[i].Count >= 3)
+                    {
+                        if (_wires[i].Count >= 4)
                         {
-                            _correctWire = 6;
-                            Debug.LogFormat("[Role Reversal #{0}] Exception 8 (If 3 or more wires share the same color): True, cut wire 6.", _moduleId);
+                            for (int j = _wires.Count - 1; j >= 0; j++)
+                            {
+                                if (_wires[j].Count == 1)
+                                {
+                                    _correctWire = (sbyte)(j + 1);
+                                    Debug.LogFormat("[Role Reversal #{0}] Condition 6 (If 3 or more wires share the same color): True, cut wire {1}.", _moduleId, _correctWire);
+                                }
+                            }
                         }
+                    }
+
+                    if (_correctWire != 0)
+                        break;
+
+                    //if first, fourth, or last share any same color
+                    if (_convertedSeed[0] == _convertedSeed[3] || _convertedSeed[0] == _convertedSeed[6] || _convertedSeed[3] == _convertedSeed[6])
+                    {
+                        _correctWire = 4;
+                        Debug.LogFormat("[Role Reversal #{0}] Condition 7 (If first, fourth or last wire share any same colors): True, cut wire {1}.", _moduleId, _correctWire);
+                        break;
+                    }
 
                     //otherwise
-                    if (_correctWire == 0)
+                    else
                     {
                         _correctWire = 3;
-                        Debug.LogFormat("[Role Reversal #{0}] Exception 9 (Otherwise): True, cut wire 3.", _moduleId);
+                        Debug.LogFormat("[Role Reversal #{0}] Condition 8 (Otherwise): True, cut wire 3.", _moduleId);
                     }
                 }
                 break;
@@ -721,14 +800,32 @@ public class roleReversal : MonoBehaviour
     /// </summary>
     private void DisplayScreen()
     {
-        _currentText = "";
-        _currentText += "Seed: " + _seed.ToString();
+        screenText.text = "";
+
+        _currentText = "Seed: " + _seed.ToString();
         _currentText += "\n\n" + _instructions[_instructionsIndex];
 
         _displayText = new char[_currentText.Length];
         _displayText = _currentText.ToCharArray();
 
-        screenText.text = "";
+        /* isn't useful anymore
+        byte searchRange = 20;
+        ushort startPos = 30;
+
+        //while it isn't outside of the array
+        while (startPos < _currentText.Length)
+        {
+            //change it to placeholder line break
+            if (_displayText[startPos] == ' ')
+            {
+                _displayText[startPos] = '§';
+                startPos += searchRange;
+            }
+
+            else
+                startPos--;
+        }
+        */
     }
 
     /// <summary>
@@ -827,76 +924,97 @@ public class roleReversal : MonoBehaviour
 
         //fifth button is a screen, so it isn't included here
         for (int i = 0; i < 4; i++)
-            btn[i].GetComponent<MeshRenderer>().material.color = mainColor;
+            btn[i].GetComponent<MeshRenderer>().material.color = new Color32((byte)(mainColor.r), (byte)(mainColor.g), mainColor.b, 255);
 
         //both top and bottom panel
         submit.GetComponent<MeshRenderer>().material.color = new Color32((byte)(mainColor.r / 10), (byte)(mainColor.g / 10), (byte)(mainColor.b / 10), 255);
         btn[4].GetComponent<MeshRenderer>().material.color = new Color32((byte)(mainColor.r / 10), (byte)(mainColor.g / 10), (byte)(mainColor.b / 10), 255);
     }
 
-    private readonly string[] _instructions = new string[45]
+    private string[] _instructions = new string[63]
     {
         //0
+        "Tutorial",
+
+        "On the Subject of\nRole Reversal.\n\nPress the bottom\nright button\nto continue.",
+        "This module has 7\nhidden wires. Tell\nthe expert the seed\nnumber above.",
+        "Take the seed\nmodulo 6 and add 2.\nThis number is\nthe amount of\nwires inside.",
+        "Convert the seed\ninto base-6, each\ndigit represents a\ncolored wire.",
+        "If you have less\nthan 7 digits, add\n0's at the beginning\nuntil you do.",
+        "Convert digits to\ncolors using Table\nA and stop when\nyou have as many\nwires as amount of\nwires calculated.",
+        "To cut a wire,\nnavigate with the\ntop buttons, then\ncut using the\ntop screen.",
+        "Skip to the correct\nsection by pressing\nthe bottom screen.\n\nGood luck!",
+
+        //8
         "2 Wires",
 
-        "2 Wires (Exception: 1)\n\nIf both wires are\ncolored the same,\ncut the second wire.",
-        "2 Wires (Exception: 2)\n\nIf both wires are\ncomplemetary to\neach other, cut the\ncold-colored wire.",
-        "2 Wires (Exception: 3)\n\nIf both wires are\ntriadic to each other,\ncut the first wire.",
-        "2 Wires (Exception: 4)\n\nOtherwise, cut the\nfirst secondary-\ncolored wire.",
+        "2 Wires (Condition: 1)\n\nIf the first wire\nis a secondary, skip\nto Condition 3.",
+        "2 Wires (Condition: 2)\n\nIf both wires are\ntriadic to each other,\ncut the lowest-\nvalued wire.",
+        "2 Wires (Condition: 3)\n\nIf the second wire\nis yellow, cut the\nfirst yellow wire.",
+        "2 Wires (Condition: 4)\n\nIf both wires are\ncolored the same,\ncut the second wire.",
+        "2 Wires (Condition: 5)\n\nIf there are 0\n batteries, cut the\nfirst wire.",
+        "2 Wires (Condition: 6)\n\nIf both wires are\ncomplemetary to\neach other, cut the\ncold-colored wire.",
+        "2 Wires (Condition: 7)\n\nIf the first wire has\nthe higher value, cut\nthe second wire.",
+        "2 Wires (Condition: 8)\n\nOtherwise, cut the\nfirst secondary-\ncolored wire.",
 
-        //5
+        //17
         "3 Wires",
 
-        "3 Wires (Exception: 1)\n\nIf only two of the\nwires share the\nsame color, cut\nthe unique wire.",
-        "3 Wires (Exception: 2)\n\nIf there is only one\nRole Reversal\nmodule, cut the\nthird wire.",
-        "3 Wires (Exception: 3)\n\nIf any warm color\ncomes before a cold\none, cut the third wire.",
-        "3 Wires (Exception: 4)\n\nIf the serial contains\nany letters found in\nthe module name,\ncut the first wire.",
-        "3 Wires (Exception: 5)\n\nOtherwise, cut the\nfirst wire.",
-
-        //11
-        "4 Wires",
-
-        "4 Wires (Exception: 1)\n\nIf the first wire is\nred, cut the\nlast red wire.",
-        "4 Wires (Exception: 2)\n\nIf less than 1 minute\nis remaining, cut\nthe first wire.",
-        "4 Wires (Exception: 3)\n\nIf there are 4 unique\ncolored wires, cut\nthe first wire with\nvalues 1, 4, or 5.",
-        "4 Wires (Exception: 4)\n\nIf the first wire is a\nwarm color, cut the\nlast warm-colored\nwire.",
-        "4 Wires (Exception: 5)\n\nIf the bomb has 10 or\nmore modules, cut\nthe third wire.",
-        "4 Wires (Exception: 6)\n\nOtherwise, cut the\nsecond wire.",
-
-        //18
-        "5 Wires",
-
-        "5 Wires (Exception: 1)\n\nIf there are any red\nwires, skip the\nnext page.",
-        "5 Wires (Exception: 2)\n\nIf there are any orange\nwires, cut the first\norange wire.",
-        "5 Wires (Exception: 3)\n\nIf any yellow wires lie\nadjacently left to a\ngreen wire, cut the\nfirst yellow wire.",
-        "5 Wires (Exception: 4)\n\nIf any yellow wires lie\nadjacently right to a\ngreen wire, cut the\nfirst green wire.",
-        "5 Wires (Exception: 5)\n\nIf there is only one\npurple wire, cut that\npurple wire.",
-        "5 Wires (Exception: 6)\n\nIf any indicators\nare off, cut the\nthird wire.",
-        "5 Wires (Exception: 7)\n\nOtherwise, cut the\nsecond wire.",
+        "3 Wires (Condition: 1)\n\nIf the first digit in\nthe serial is odd,\nskip to Condition 3.",
+        "3 Wires (Condition: 2)\n\nIf there is only one\nwire matching the\nmodule's color, cut\nthat matching wire.",
+        "3 Wires (Condition: 3)\n\nIf all wires share\nthe same color, cut\nthe second wire.",
+        "3 Wires (Condition: 4)\n\nIf there isn't only one\nRole Reversal module,\ncut the third wire,\nalso thanks!",
+        "3 Wires (Condition: 5)\n\nIf any warm color\ncomes before a\ncold one, cut\nthe third wire.",
+        "3 Wires (Condition: 6)\n\nIf the serial contains\nany letters found in\nthe module name,\ncut the first wire.",
+        "3 Wires (Condition: 7)\n\nIf only two of the\nwires share the\nsame color, cut\nthe unique wire.",
+        "3 Wires (Condition: 8)\n\nOtherwise, cut the\nfirst wire.",
 
         //26
-        "6 Wires",
+        "4 Wires",
 
-        "6 Wires (Exception: 1)\n\nIf the serial has\nexactly 2 digits,\nskip to exception 4.",
-        "6 Wires (Exception: 2)\n\nIf the serial has\nany vowel, cut\nthe sixth wire.",
-        "6 Wires (Exception: 3)\n\nIf all primary colors\nexist, cut the first\nwire that has its last\nletter an E.",
-        "6 Wires (Exception: 4)\n\nIf the seed is\ndivisible by 3, cut\nthe fourth wire.",
-        "6 Wires (Exception: 5)\n\nIf exactly 2 pairs\nor exactly 1 triplet\nmatch colors, cut the\nfirst unique wire.",
-        "6 Wires (Exception: 6)\n\nIf more than 10\nminutes are\nremaining, cut\nthe second wire.",
-        "6 Wires (Exception: 7)\n\nIf the seed is even,\ncut the fifth wire.",
-        "6 Wires (Exception: 8)\n\nOtherwise, cut the\nthird wire.",
+        "4 Wires (Condition: 1)\n\nIf you have more\nthan 2 indicators,\nskip to Condition 3.",
+        "4 Wires (Condition: 2)\n\nIf the first wire is\nred, cut the\nlast red wire.",
+        "4 Wires (Condition: 3)\n\nIf there are 4 unique\ncolored wires, cut\nthe first wire with\nvalues 1, 4, or 5.",
+        "4 Wires (Condition: 4)\n\nIf less than 1 minute\nis remaining, cut\nthe first wire.",
+        "4 Wires (Condition: 5)\n\nIf all wires are\nsorted, cut the first\ncold-colored or\nnon-unique wire.",
+        "4 Wires (Condition: 6)\n\nIf the bomb has 7 or\nless modules, cut the\n(module count) wire.",
+        "4 Wires (Condition: 7)\n\nIf the first wire is\na warm color,\ncut the last warm-\ncolored wire.",
+        "4 Wires (Condition: 8)\n\nOtherwise, cut the\nsecond wire.",
 
         //35
+        "5 Wires",
+
+        "5 Wires (Condition: 1)\n\nIf there are any red\nwires, skip to\nCondition 3.",
+        "5 Wires (Condition: 2)\n\nIf there are any\norange wires, cut the\nfirst orange wire.",
+        "5 Wires (Condition: 3)\n\nIf any yellow wires\nlie adjacently left\nto a green wire,\ncut the first\nyellow wire.",
+        "5 Wires (Condition: 4)\n\nIf any yellow wires\nlie adjacently right\nto a green wire,\ncut the first\ngreen wire.",
+        "5 Wires (Condition: 5)\n\nIf indicator FRK or\nCAR exist, cut\n(N modulo 7) + 1 for\nN lit indicators.",
+        "5 Wires (Condition: 6)\n\nIf there is only one\npurple wire, cut that\npurple wire.",
+        "5 Wires (Condition: 7)\n\nIf any indicators\nare off, cut the\nthird wire.",
+        "5 Wires (Condition: 8)\n\nOtherwise, cut the\nsecond wire.",
+
+        //44
+        "6 Wires",
+
+        "6 Wires (Condition: 1)\n\nIf the serial has\nexactly 2 digits,\nskip to Condition 3.",
+        "6 Wires (Condition: 2)\n\nIf the serial has\nany vowel, cut\nthe sixth wire.",
+        "6 Wires (Condition: 3)\n\nIf all primary colors\nexist, cut the first\nwire that has its last\nletter an E.",
+        "6 Wires (Condition: 4)\n\nIf the seed is\ndivisible by 3, cut\nthe fourth wire.",
+        "6 Wires (Condition: 5)\n\nIf exactly 2 pairs\nor exactly 1 triplet\nmatch colors, cut the\nfirst unique wire.",
+        "6 Wires (Condition: 6)\n\nIf more than 10\nminutes are\nremaining, cut\nthe second wire.",
+        "6 Wires (Condition: 7)\n\nIf the seed is even,\ncut the fifth wire.",
+        "6 Wires (Condition: 8)\n\nOtherwise, cut the\nthird wire.",
+
+        //53
         "7 Wires",
 
-        "7 Wires (Exception: 1)\n\nIf there are as many\nor more lit indicators\nas unlit indicators,\nskip to exception 5.",
-        "7 Wires (Exception: 2)\n\nIf the first, fourth,\nor last wire share\nany color, cut the\nfourth wire.",
-        "7 Wires (Exception: 3)\n\nIf there are 2 or more\nblue wires, cut the\nwire after the first\nblue wire.",
-        "7 Wires (Exception: 4)\n\nIf there aren't exactly\n2 purple wires, cut\nthe seventh wire.",
-        "7 Wires (Exception: 5)\n\nIf indicator FRK or\nCAR exist, cut\n(N modulo 7) + 1 for\nN lit indicators.",
-        "7 Wires (Exception: 6)\n\nIf the serial has any\nmatching numbers to\namount of red wires,\ncut the sixth wire.",
-        "7 Wires (Exception: 7)\n\nIf there are less\nbatteries than orange\nwires, cut the\nlast orange wire.",
-        "7 Wires (Exception: 8)\n\nIf there are 3 or\nmore of the same\ncolors, cut the\n sixth wire.",
-        "7 Wires (Exception: 9)\n\nOtherwise, cut the\nthird wire.",
+        "7 Wires (Condition: 1)\n\nIf there are as many\nor more lit indicators\nas unlit indicators,\nskip to Condition 3.",
+        "7 Wires (Condition: 2)\n\nIf there aren't exactly\n2 purple wires, cut\nthe seventh wire.",
+        "7 Wires (Condition: 3)\n\nIf there are 3 or more\nblue wires, cut the\nwire after the second\nblue wire.",
+        "7 Wires (Condition: 4)\n\nIf the serial has any\nmatching numbers to\namount of red wires,\ncut the sixth wire.",
+        "7 Wires (Condition: 5)\n\nIf there are less\nbatteries than orange\nwires, cut the\nlast orange wire.",
+        "7 Wires (Condition: 6)\n\nIf there are 4 or\nmore of the same\ncolors, cut the\nlast non-unique wire.",
+        "7 Wires (Condition: 7)\n\nIf the first, fourth,\nor last wire share\nany color, cut the\nfourth wire.",
+        "7 Wires (Condition: 8)\n\nOtherwise, cut the\nthird wire.",
     };
 }
