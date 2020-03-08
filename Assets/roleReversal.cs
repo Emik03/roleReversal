@@ -623,11 +623,11 @@ public class roleReversal : MonoBehaviour
                         triplets++;
                 }
 
-                //if seed is divisible by 3
-                if (_seed % 3 == 0)
+                //if seed is divisible by 5
+                if (_seed % 5 == 0)
                 {
                     _correctWire = 4;
-                    Debug.LogFormat("[Role Reversal #{0}] Condition 4 (If seed is divisible by 3): True, cut wire 4.", _moduleId);
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 4 (If seed is divisible by 5): True, cut wire 4.", _moduleId);
                 }
 
                 //if there is a triplet, or 2 pairs were detected previously
@@ -999,7 +999,7 @@ public class roleReversal : MonoBehaviour
         "6 Wires (Condition: 1)\n\nIf the serial has\nexactly 2 digits,\nskip to Condition 3.",
         "6 Wires (Condition: 2)\n\nIf the serial has\nany vowel, cut\nthe sixth wire.",
         "6 Wires (Condition: 3)\n\nIf all primary colors\nexist, cut the first\nwire that has its last\nletter an E.",
-        "6 Wires (Condition: 4)\n\nIf the seed is\ndivisible by 3, cut\nthe fourth wire.",
+        "6 Wires (Condition: 4)\n\nIf the seed is\ndivisible by 5, cut\nthe fourth wire.",
         "6 Wires (Condition: 5)\n\nIf exactly 2 pairs\nor exactly 1 triplet\nmatch colors, cut the\nfirst unique wire.",
         "6 Wires (Condition: 6)\n\nIf more than 10\nminutes are\nremaining, cut\nthe second wire.",
         "6 Wires (Condition: 7)\n\nIf the seed is even,\ncut the fifth wire.",
