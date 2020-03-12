@@ -15,16 +15,20 @@ public class roleReversal : MonoBehaviour
     public TextMesh screenText, submitText;
     public Component background;
 
+    bool isSolved = false;
+    byte souvenir;
+    List<byte> redWires = new List<byte>(0), orangeWires = new List<byte>(0), yellowWires = new List<byte>(0),
+               greenWires = new List<byte>(0), blueWires = new List<byte>(0), purpleWires = new List<byte>(0);
+    List<List<byte>> wires;
+
     //internal Manual manual = new Manual();
 
-    private bool _lightsOn = false, _isSolved = false, _displayWin = false;
+    private bool _lightsOn = false, _displayWin = false;
     private sbyte _wireSelected = 0, _correctWire = 0, _frames = 0, _instructionsIndex = 1;
     private int _moduleId = 0, _seed = 0;
     private string _currentText = "";
 
     private List<char> _convertedSeed;
-    private List<byte> _redWires = new List<byte>(0), _orangeWires = new List<byte>(0), _yellowWires = new List<byte>(0),
-                       _greenWires = new List<byte>(0), _blueWires = new List<byte>(0), _purpleWires = new List<byte>(0);
 
     private char[] _displayText = new char[0];
     private readonly string[] _completeText = new string[9] { "C", "o", "m", "p", "l", "e", "t", "e", "!" };
@@ -56,7 +60,7 @@ public class roleReversal : MonoBehaviour
         //update every fourth
         _frames %= 4;
 
-        if (_isSolved)
+        if (isSolved)
         {
             //if color transition is not complete, do the color transition
             if (mainColor.r != 0)
@@ -101,7 +105,7 @@ public class roleReversal : MonoBehaviour
     }
 
     /// <summary>
-    /// Button initaliser, runs upon loading.
+    /// Button and wire initaliser, runs upon loading.
     /// </summary>
     private void Awake()
     {
@@ -141,14 +145,17 @@ public class roleReversal : MonoBehaviour
 
         Debug.LogFormat("");
 
+        //_instructions = manual.GenerateManual();
+
         //_seed!
         //generate seed
         _seed = Random.Range(0, 279936);
 
-        //_instructions = manual.GenerateManual();
-
         //meme seed for thumbnail
         //_seed = 279935;
+
+        //all wires together
+        wires = new List<List<byte>>(6) { redWires, orangeWires, yellowWires, greenWires, blueWires, purpleWires };
 
         //run this method every time the screen needs to be updated
         DisplayScreen();
@@ -168,7 +175,7 @@ public class roleReversal : MonoBehaviour
         btn[num].AddInteractionPunch();
 
         //if lights are off, the buttons should do nothing
-        if (!_lightsOn || _isSolved) return;
+        if (!_lightsOn || isSolved) return;
 
         //0 and 1 are the left and right buttons for top panel that controls wire cutting
         //2 and 3 are the left and right buttons for the bottom panel that controls instructions
@@ -229,7 +236,7 @@ public class roleReversal : MonoBehaviour
         submit.AddInteractionPunch(3);
 
         //if lights are off or it's solved, the buttons should do nothing
-        if (!_lightsOn || _isSolved) return;
+        if (!_lightsOn || isSolved) return;
 
         //play cut wire sound effect
         Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.WireSnip, submit.transform);
@@ -251,7 +258,7 @@ public class roleReversal : MonoBehaviour
             Module.HandlePass();
 
             //deactivate module
-            _isSolved = true;
+            isSolved = true;
         }
 
         else
@@ -276,9 +283,6 @@ public class roleReversal : MonoBehaviour
         GetWires();
         _correctWire = 0;
 
-        //all wires together
-        List<List<byte>> _wires = new List<List<byte>>(6) { _redWires, _orangeWires, _yellowWires, _greenWires, _blueWires, _purpleWires };
-
         //counts the amount of wires
         switch (_convertedSeed.Count)
         {
@@ -287,39 +291,34 @@ public class roleReversal : MonoBehaviour
                 //if first is secondary and both triadic
                 if (_convertedSeed[0] % 2 == 1 && Mathf.Abs((float)(char.GetNumericValue(_convertedSeed[0]) - char.GetNumericValue(_convertedSeed[1]))) == 2 || Mathf.Abs((float)(char.GetNumericValue(_convertedSeed[0]) - char.GetNumericValue(_convertedSeed[1]))) == 4)
                 {
-                    if (_convertedSeed[0] < _convertedSeed[0])
-                    {
+                    if (_convertedSeed[0] < _convertedSeed[1])
                         _correctWire = 1;
-                        Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If both are triadic): True, cut wire 1.", _moduleId);
-                    }
 
                     else
-                    {
                         _correctWire = 2;
-                        Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If both are triadic): True, cut wire 2.", _moduleId);
-                    }
+
+                    souvenir = 2;
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If both are triadic): True, cut wire {1}.", _moduleId, _correctWire);
                 }
 
                 //if second wire is yellow
-                if (_convertedSeed[1] == '2')
+                else if (_convertedSeed[1] == '2')
                 {
                     if (_convertedSeed[0] == '2')
-                    {
                         _correctWire = 1;
-                        Debug.LogFormat("[Role Reversal #{0}] Condition 3 (If second wire is yellow): True, cut wire 1.", _moduleId);
-                    }
-
+                        
                     else
-                    {
                         _correctWire = 2;
-                        Debug.LogFormat("[Role Reversal #{0}] Condition 3 (If second wire is yellow): True, cut wire 2.", _moduleId);
-                    }
+
+                    souvenir = 3;
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 3 (If second wire is yellow): True, cut wire {1}.", _moduleId, _correctWire);
                 }
 
                 //if wire colors are the same
-                if (_convertedSeed[0] == _convertedSeed[1])
+                else if (_convertedSeed[0] == _convertedSeed[1])
                 {
                     _correctWire = 2;
+                    souvenir = 4;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 4 (If both are the same): True, cut wire 2.", _moduleId);
                 }
 
@@ -327,6 +326,7 @@ public class roleReversal : MonoBehaviour
                 else if (Info.GetBatteryCount() == 0)
                 {
                     _correctWire = 1;
+                    souvenir = 5;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 5 (If there are 0 batteries): True, cut wire 1.", _moduleId);
                 }
 
@@ -339,12 +339,14 @@ public class roleReversal : MonoBehaviour
                     else
                         _correctWire = 1;
 
+                    souvenir = 6;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 6 (If both are complementary): True, cut wire {1}.", _moduleId, _correctWire);
                 }
 
                 else if (_convertedSeed[0] > _convertedSeed[1])
                 {
                     _correctWire = 2;
+                    souvenir = 7;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 7 (Otherwise): True, cut wire 2.", _moduleId);
                 }
 
@@ -357,6 +359,7 @@ public class roleReversal : MonoBehaviour
                     else
                         _correctWire = 1;
 
+                    souvenir = 8;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 8 (Otherwise): True, cut wire {1}.", _moduleId, _correctWire);
                 }
                 break;
@@ -364,9 +367,10 @@ public class roleReversal : MonoBehaviour
             //3 wires!
             case 3:
                 //if serial is even and one purple
-                if (_purpleWires.Count == 1 && Info.GetSerialNumberNumbers().First() % 2 == 0)
+                if (purpleWires.Count == 1 && Info.GetSerialNumberNumbers().First() % 2 == 0)
                 {
-                    _correctWire = (sbyte)(_purpleWires[0] + 1);
+                    _correctWire = (sbyte)(purpleWires[0] + 1);
+                    souvenir = 2;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If there is only one wire matching the module's color): True, cut wire {1}.", _moduleId, _correctWire);
                     break;
                 }
@@ -375,6 +379,7 @@ public class roleReversal : MonoBehaviour
                 else if (_convertedSeed.Distinct().Count() == 1)
                 {
                     _correctWire = 2;
+                    souvenir = 3;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 3 (If all wires share color): True, cut wire {1}.", _moduleId, _correctWire);
                     break;
                 }
@@ -383,6 +388,7 @@ public class roleReversal : MonoBehaviour
                 else if (moduleCount != 1)
                 {
                     _correctWire = 3;
+                    souvenir = 4;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 4 (If only one of this module is present): True, cut wire 3.", _moduleId);
                     break;
                 }
@@ -394,6 +400,7 @@ public class roleReversal : MonoBehaviour
                             if (char.GetNumericValue(_convertedSeed[j + 1]) >= 3)
                             {
                                 _correctWire = (sbyte)(char.GetNumericValue(_convertedSeed[j]) + 1);
+                                souvenir = 5;
                                 Debug.LogFormat("[Role Reversal #{0}] Condition 5 (If a warm color is to the left of a cold color): True, cut wire {1}.", _moduleId, _correctWire);
                                 break;
                             }
@@ -405,17 +412,19 @@ public class roleReversal : MonoBehaviour
                 if (Info.GetSerialNumberLetters().Any("ROLEVSAL".Contains))
                 {
                     _correctWire = 1;
+                    souvenir = 6;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 6 (If serial contains module name's letters): True, cut wire 1.", _moduleId);
                     break;
                 }
 
                 //if only two wires share color
                 else if (_convertedSeed.Count - 1 == _convertedSeed.Distinct().Count())
-                    for (int i = 0; i < _wires.Count; i++)
+                    for (int i = 0; i < wires.Count; i++)
                     {
-                        if (_wires[i].Count == 1)
+                        if (wires[i].Count == 1)
                         {
-                            _correctWire = (sbyte)(_wires[i][0] + 1);
+                            _correctWire = (sbyte)(wires[i][0] + 1);
+                            souvenir = 7;
                             Debug.LogFormat("[Role Reversal #{0}] Condition 7 (If only two wires share color): True, cut wire {1}.", _moduleId, _correctWire);
                             break;
                         }
@@ -428,6 +437,7 @@ public class roleReversal : MonoBehaviour
                 else
                 {
                     _correctWire = 1;
+                    souvenir = 8;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 8 (Otherwise): True, cut wire 1.", _moduleId);
                 }
                 break;
@@ -437,7 +447,8 @@ public class roleReversal : MonoBehaviour
                 if (Info.GetIndicators().Count() <= 2 && _convertedSeed[0] == '0')
                 {
                     //if first wire is red
-                    _correctWire = (sbyte)(_redWires[_redWires.Count - 1] + 1);
+                    _correctWire = (sbyte)(redWires[redWires.Count - 1] + 1);
+                    souvenir = 2;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If first wire is red): True, cut wire {1}.", _moduleId, _correctWire);
                 }
 
@@ -449,6 +460,7 @@ public class roleReversal : MonoBehaviour
                         if (_convertedSeed[i] == '1' || _convertedSeed[i] == '4' || _convertedSeed[i] == '5')
                         {
                             _correctWire = (sbyte)(char.GetNumericValue(_convertedSeed[i]) + 1);
+                            souvenir = 3;
                             Debug.LogFormat("[Role Reversal #{0}] Condition 3 (If all wires are unique): True, cut wire {1}.", _moduleId, _correctWire);
                             break;
                         }
@@ -459,6 +471,7 @@ public class roleReversal : MonoBehaviour
                 else if (Info.GetTime() < 60)
                 {
                     _correctWire = 1;
+                    souvenir = 4;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 4 (If less than 1 minute is left): True, cut wire 1.", _moduleId);
                     break;
                 }
@@ -477,9 +490,10 @@ public class roleReversal : MonoBehaviour
                         for (int j = 0; j < _convertedSeed.Count; j++)
                         {
                             //if cold, or not unique
-                            if (_convertedSeed[i] >= 3 || _wires[(int)char.GetNumericValue(_convertedSeed[i])].Count > 1)
+                            if (_convertedSeed[i] >= 3 || wires[(int)char.GetNumericValue(_convertedSeed[i])].Count > 1)
                             {
                                 _correctWire = (sbyte)(j + 1);
+                                souvenir = 5;
                                 Debug.LogFormat("[Role Reversal #{0}] Condition 5 (If wires are sorted): True, cut wire {1}.", _moduleId, _convertedSeed);
                                 break;
                             }
@@ -494,6 +508,7 @@ public class roleReversal : MonoBehaviour
                 if (Info.GetModuleIDs().Count <= 7)
                 {
                     _correctWire = (sbyte)(Info.GetModuleIDs().Count + 1);
+                    souvenir = 6;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 6 (If 7 or less modules are on the bomb): True, cut wire {1}.", _moduleId, _correctWire);
                 }
 
@@ -505,6 +520,7 @@ public class roleReversal : MonoBehaviour
                         if (char.GetNumericValue(_convertedSeed[i]) <= 2)
                         {
                             _correctWire = (sbyte)(i + 1);
+                            souvenir = 7;
                             Debug.LogFormat("[Role Reversal #{0}] Condition 7 (If first wire is a warm color): True, cut wire {1}.", _moduleId, _correctWire);
                             break;
                         }
@@ -515,6 +531,7 @@ public class roleReversal : MonoBehaviour
                 else
                 {
                     _correctWire = 2;
+                    souvenir = 8;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 8 (Otherwise): True, cut wire 2.", _moduleId);
                 }
                 break;
@@ -524,7 +541,8 @@ public class roleReversal : MonoBehaviour
                 //if both red doesn't exist and orange exists
                 if (!_convertedSeed.Contains('0') && _convertedSeed.Contains('1'))
                 {
-                    _correctWire = (sbyte)(_orangeWires[0] + 1);
+                    _correctWire = (sbyte)(orangeWires[0] + 1);
+                    souvenir = 2;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If there are any orange wires): True, cut wire 1.", _moduleId, _correctWire);
                 }
 
@@ -535,7 +553,8 @@ public class roleReversal : MonoBehaviour
                         //if yellow wire is to the left of green wire
                         if (_convertedSeed[i] == '2' && _convertedSeed[i + 1] == '3')
                         {
-                            _correctWire = (sbyte)(_yellowWires[0] + 1); ;
+                            _correctWire = (sbyte)(yellowWires[0] + 1);
+                            souvenir = 3;
                             Debug.LogFormat("[Role Reversal #{0}] Condition 3 (If yellow wire to the left of green wire): True, cut wire {1}.", _moduleId, _correctWire);
                             break;
                         }
@@ -543,7 +562,8 @@ public class roleReversal : MonoBehaviour
                         //if yellow wire is to the right of green wire
                         if (_convertedSeed[i] == '3' && _convertedSeed[i + 1] == '2')
                         {
-                            _correctWire = (sbyte)(_greenWires[0] + 1);
+                            _correctWire = (sbyte)(greenWires[0] + 1);
+                            souvenir = 4;
                             Debug.LogFormat("[Role Reversal #{0}] Condition 4 (If yellow wire to the right of green wire): True, cut wire {1}.", _moduleId, _correctWire);
                             break;
                         }
@@ -557,13 +577,15 @@ public class roleReversal : MonoBehaviour
                     if (Info.GetIndicators().Any("CAR".Contains) || Info.GetIndicators().Any("FRK".Contains))
                     {
                         _correctWire = (sbyte)((Info.GetOnIndicators().Count() % 7) + 1);
+                        souvenir = 5;
                         Debug.LogFormat("[Role Reversal #{0}] Condition 5 (If there is CAR or FRK label): True, cut wire {1}.", _moduleId, _correctWire);
                     }
 
                     //if one purple wire exists
-                    else if (_purpleWires.Count == 1)
+                    else if (purpleWires.Count == 1)
                     {
-                        _correctWire = (sbyte)(_purpleWires[0] + 1);
+                        _correctWire = (sbyte)(purpleWires[0] + 1);
+                        souvenir = 6;
                         Debug.LogFormat("[Role Reversal #{0}] Condition 6 (If one purple wire exists): True, cut wire {1}.", _moduleId, _correctWire);
                     }
 
@@ -571,6 +593,7 @@ public class roleReversal : MonoBehaviour
                     else if (Info.GetOffIndicators().Count() > 0)
                     {
                         _correctWire = 3;
+                        souvenir = 7;
                         Debug.LogFormat("[Role Reversal #{0}] Condition 7 (If any off indicators are off): True, cut wire 3.", _moduleId);
                     }
 
@@ -578,6 +601,7 @@ public class roleReversal : MonoBehaviour
                     else
                     {
                         _correctWire = 2;
+                        souvenir = 8;
                         Debug.LogFormat("[Role Reversal #{0}] Condition 8 (Otherwise): True, cut wire 2.", _moduleId);
                     }
 
@@ -590,17 +614,19 @@ public class roleReversal : MonoBehaviour
                 if (Info.GetSerialNumberNumbers().Count() != 2 && Info.GetSerialNumberLetters().Any("AEIOU".Contains))
                 {
                     _correctWire = 6;
+                    souvenir = 2;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If serial has a vowel): True, cut wire 6.", _moduleId);
                     break;
                 }
 
                 //Debug.LogFormat("{0} {1} {2}", _redWires.Count, _yellowWires.Count, _blueWires.Count);
                 //if all primary colors exist
-                if (_redWires.Count >= 1 && _yellowWires.Count >= 1 && _blueWires.Count >= 1)
+                if (redWires.Count >= 1 && yellowWires.Count >= 1 && blueWires.Count >= 1)
                     for (int i = 0; i < _convertedSeed.Count; i++)
                         if (_convertedSeed[i] == '1' || _convertedSeed[i] == '4' || _convertedSeed[i] == '5')
                         {
                             _correctWire = (sbyte)(i + 1);
+                            souvenir = 3;
                             Debug.LogFormat("[Role Reversal #{0}] Condition 3 (If all primary colors exist): True, cut wire {1}.", _moduleId, _correctWire);
                             break;
                         }
@@ -612,14 +638,14 @@ public class roleReversal : MonoBehaviour
                 byte triplets = 0;
 
                 //if 2 pairs or 1 triplet
-                for (int i = 0; i < _wires.Count; i++)
+                for (int i = 0; i < wires.Count; i++)
                 {
                     //check for pairs
-                    if (_wires[i].Count == 2)
+                    if (wires[i].Count == 2)
                         pairs++;
 
                     //check for triplets
-                    else if (_wires[i].Count == 3)
+                    else if (wires[i].Count == 3)
                         triplets++;
                 }
 
@@ -627,6 +653,7 @@ public class roleReversal : MonoBehaviour
                 if (_seed % 5 == 0)
                 {
                     _correctWire = 4;
+                    souvenir = 4;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 4 (If seed is divisible by 5): True, cut wire 4.", _moduleId);
                 }
 
@@ -639,9 +666,10 @@ public class roleReversal : MonoBehaviour
                      * the specified color. if not, it continues through the list until it finds one.
                     */
                     for (int i = 0; i < _convertedSeed.Count; i++)
-                        if (_wires[(int)char.GetNumericValue(_convertedSeed[i])].Count == 1)
+                        if (wires[(int)char.GetNumericValue(_convertedSeed[i])].Count == 1)
                         {
-                            _correctWire = (sbyte)(_wires[System.Convert.ToSByte(char.GetNumericValue(_convertedSeed[i]))][0] + 1);
+                            _correctWire = (sbyte)(wires[System.Convert.ToSByte(char.GetNumericValue(_convertedSeed[i]))][0] + 1);
+                            souvenir = 5;
                             Debug.LogFormat("[Role Reversal #{0}] Condition 5 (If only 2 pairs or only 1 triplet exist): True, cut wire {1}.", _moduleId, _correctWire);
                             break;
                         }
@@ -651,6 +679,7 @@ public class roleReversal : MonoBehaviour
                 else if (Info.GetTime() > 600)
                 {
                     _correctWire = 2;
+                    souvenir = 6;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 6 (If more than 10 minutes remain): True, cut wire 2.", _moduleId);
                 }
 
@@ -658,6 +687,7 @@ public class roleReversal : MonoBehaviour
                 else if (_seed % 2 == 0)
                 {
                     _correctWire = 5;
+                    souvenir = 7;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 7 (If seed is even): True, cut wire 5.", _moduleId);
                 }
 
@@ -665,6 +695,7 @@ public class roleReversal : MonoBehaviour
                 else
                 {
                     _correctWire = 3;
+                    souvenir = 8;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 8 (Otherwise): True, cut wire 3.", _moduleId);
                 }
                 break;
@@ -675,9 +706,10 @@ public class roleReversal : MonoBehaviour
                 if (Info.GetOnIndicators().Count() < Info.GetOffIndicators().Count())
                 {
                     //if there aren't 2 purple wires
-                    if (_purpleWires.Count != 2)
+                    if (purpleWires.Count != 2)
                     {
                         _correctWire = 7;
+                        souvenir = 2;
                         Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If there aren't 2 purple wires): True, cut wire 7.", _moduleId);
                         break;
                     }
@@ -687,39 +719,43 @@ public class roleReversal : MonoBehaviour
                     break;
 
                 //if there are 2 blue wires
-                if (_blueWires.Count >= 3)
+                if (blueWires.Count >= 3)
                 {
-                    _correctWire = (sbyte)(_blueWires[1] + 2);
+                    _correctWire = (sbyte)(blueWires[1] + 2);
+                    souvenir = 3;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 3 (If there are 3 blue wires): True, cut wire {1}.", _moduleId, _correctWire);
                     break;
                 }
 
                 //if serial has a matching number to red wires
-                else if (Info.GetSerialNumber().Contains(System.Convert.ToChar(_redWires.Count + 48)))
+                else if (Info.GetSerialNumber().Contains(System.Convert.ToChar(redWires.Count + 48)))
                 {
                     _correctWire = 6;
+                    souvenir = 4;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 4 (If the serial has a matching number to the number of red wires present): True, cut wire 6.", _moduleId);
                 }
 
                 //if there are less batteries than orange wires
-                else if (Info.GetBatteryCount() < _orangeWires.Count)
+                else if (Info.GetBatteryCount() < orangeWires.Count)
                 {
-                    _correctWire = (sbyte)(_orangeWires[_orangeWires.Count - 1] + 1);
+                    _correctWire = (sbyte)(orangeWires[orangeWires.Count - 1] + 1);
+                    souvenir = 5;
                     Debug.LogFormat("[Role Reversal #{0}] Condition 5 (If there are less batteries than orange wires): True, cut wire {1}.", _moduleId, _correctWire);
                 }
 
                 else
                 {
                     //if 4 or more wires share the same color
-                    for (int i = 0; i < _wires.Count; i++)
+                    for (int i = 0; i < wires.Count; i++)
                     {
-                        if (_wires[i].Count >= 4)
+                        if (wires[i].Count >= 4)
                         {
-                            for (int j = _wires.Count - 1; j >= 0; j++)
+                            for (int j = wires.Count - 1; j >= 0; j++)
                             {
-                                if (_wires[j].Count == 1)
+                                if (wires[j].Count == 1)
                                 {
                                     _correctWire = (sbyte)(j + 1);
+                                    souvenir = 6;
                                     Debug.LogFormat("[Role Reversal #{0}] Condition 6 (If 3 or more wires share the same color): True, cut wire {1}.", _moduleId, _correctWire);
                                 }
                             }
@@ -733,6 +769,7 @@ public class roleReversal : MonoBehaviour
                     if (_convertedSeed[0] == _convertedSeed[3] || _convertedSeed[0] == _convertedSeed[6] || _convertedSeed[3] == _convertedSeed[6])
                     {
                         _correctWire = 4;
+                        souvenir = 7;
                         Debug.LogFormat("[Role Reversal #{0}] Condition 7 (If first, fourth or last wire share any same colors): True, cut wire {1}.", _moduleId, _correctWire);
                         break;
                     }
@@ -741,6 +778,7 @@ public class roleReversal : MonoBehaviour
                     else
                     {
                         _correctWire = 3;
+                        souvenir = 8;
                         Debug.LogFormat("[Role Reversal #{0}] Condition 8 (Otherwise): True, cut wire 3.", _moduleId);
                     }
                 }
@@ -754,12 +792,12 @@ public class roleReversal : MonoBehaviour
     private void GetWires()
     {
         //reset all lists in case if it was ran previously
-        _redWires = new List<byte>(0);
-        _orangeWires = new List<byte>(0);
-        _yellowWires = new List<byte>(0);
-        _greenWires = new List<byte>(0);
-        _blueWires = new List<byte>(0);
-        _purpleWires = new List<byte>(0);
+        redWires = new List<byte>(0);
+        orangeWires = new List<byte>(0);
+        yellowWires = new List<byte>(0);
+        greenWires = new List<byte>(0);
+        blueWires = new List<byte>(0);
+        purpleWires = new List<byte>(0);
 
         //count number of wires that are any color
         for (int i = 0; i < _convertedSeed.Count; i++)
@@ -767,27 +805,27 @@ public class roleReversal : MonoBehaviour
             switch (_convertedSeed[i])
             {
                 case '0':
-                    _redWires.Add((byte)i);
+                    redWires.Add((byte)i);
                     break;
 
                 case '1':
-                    _orangeWires.Add((byte)i);
+                    orangeWires.Add((byte)i);
                     break;
 
                 case '2':
-                    _yellowWires.Add((byte)i);
+                    yellowWires.Add((byte)i);
                     break;
 
                 case '3':
-                    _greenWires.Add((byte)i);
+                    greenWires.Add((byte)i);
                     break;
 
                 case '4':
-                    _blueWires.Add((byte)i);
+                    blueWires.Add((byte)i);
                     break;
 
                 case '5':
-                    _purpleWires.Add((byte)i);
+                    purpleWires.Add((byte)i);
                     break;
             }
         }
