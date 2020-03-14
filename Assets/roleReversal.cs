@@ -16,7 +16,11 @@ public class roleReversal : MonoBehaviour
     public Component background;
 
     bool isSolved = false;
+
+#pragma warning disable 414
     byte souvenir;
+#pragma warning restore 414
+
     List<byte> redWires = new List<byte>(0), orangeWires = new List<byte>(0), yellowWires = new List<byte>(0),
                greenWires = new List<byte>(0), blueWires = new List<byte>(0), purpleWires = new List<byte>(0);
     List<List<byte>> wires;
@@ -459,7 +463,7 @@ public class roleReversal : MonoBehaviour
                     {
                         if (_convertedSeed[i] == '1' || _convertedSeed[i] == '4' || _convertedSeed[i] == '5')
                         {
-                            _correctWire = (sbyte)(char.GetNumericValue(_convertedSeed[i]) + 1);
+                            _correctWire = (sbyte)(i + 1);
                             souvenir = 3;
                             Debug.LogFormat("[Role Reversal #{0}] Condition 3 (If all wires are unique): True, cut wire {1}.", _moduleId, _correctWire);
                             break;
@@ -705,12 +709,12 @@ public class roleReversal : MonoBehaviour
                 //if there aren't more unlit than lit
                 if (Info.GetOnIndicators().Count() < Info.GetOffIndicators().Count())
                 {
-                    //if there aren't 2 purple wires
-                    if (purpleWires.Count != 2)
+                    //if there are less than 2 purple wires
+                    if (purpleWires.Count < 2)
                     {
                         _correctWire = 7;
                         souvenir = 2;
-                        Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If there aren't 2 purple wires): True, cut wire 7.", _moduleId);
+                        Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If there are less than 2 purple wires): True, cut wire 7.", _moduleId);
                         break;
                     }
                 }
@@ -718,7 +722,7 @@ public class roleReversal : MonoBehaviour
                 if (_correctWire != 0)
                     break;
 
-                //if there are 2 blue wires
+                //if there are 3 blue wires
                 if (blueWires.Count >= 3)
                 {
                     _correctWire = (sbyte)(blueWires[1] + 2);
@@ -1047,7 +1051,7 @@ public class roleReversal : MonoBehaviour
         "7 Wires",
 
         "7 Wires (Condition: 1)\n\nIf there are as many\nor more lit indicators\nas unlit indicators,\nskip to Condition 3.",
-        "7 Wires (Condition: 2)\n\nIf there aren't exactly\n2 purple wires, cut\nthe seventh wire.",
+        "7 Wires (Condition: 2)\n\nIf there aren't 2 or\nmore purple wires,\ncut the seventh wire.",
         "7 Wires (Condition: 3)\n\nIf there are 3 or more\nblue wires, cut the\nwire after the second\nblue wire.",
         "7 Wires (Condition: 4)\n\nIf the serial has any\nmatching numbers to\namount of red wires,\ncut the sixth wire.",
         "7 Wires (Condition: 5)\n\nIf there are less\nbatteries than orange\nwires, cut the\nlast orange wire.",
