@@ -400,10 +400,10 @@ public class roleReversal : MonoBehaviour
                 //if warm color is to the left of cold color
                 for (int i = 0; i < _convertedSeed.Count - 1; i++)
                     if (char.GetNumericValue(_convertedSeed[i]) <= 2 && char.GetNumericValue(_convertedSeed[i + 1]) >= 3)
-                        for (int j = _convertedSeed.Count - 2; j > 0; j--)
-                            if (char.GetNumericValue(_convertedSeed[j + 1]) >= 3)
+                        for (int j = _convertedSeed.Count - 1; j >= 0; j--)
+                            if (char.GetNumericValue(_convertedSeed[j]) >= 3)
                             {
-                                _correctWire = (sbyte)(char.GetNumericValue(_convertedSeed[j]) + 1);
+                                _correctWire = (sbyte)(j + 1);
                                 souvenir = 5;
                                 Debug.LogFormat("[Role Reversal #{0}] Condition 5 (If a warm color is to the left of a cold color): True, cut wire {1}.", _moduleId, _correctWire);
                                 break;
@@ -440,9 +440,9 @@ public class roleReversal : MonoBehaviour
                 //otherwise
                 else
                 {
-                    _correctWire = 1;
+                    _correctWire = 2;
                     souvenir = 8;
-                    Debug.LogFormat("[Role Reversal #{0}] Condition 8 (Otherwise): True, cut wire 1.", _moduleId);
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 8 (Otherwise): True, cut wire 2.", _moduleId);
                 }
                 break;
 
@@ -1003,13 +1003,13 @@ public class roleReversal : MonoBehaviour
         "3 Wires",
 
         "3 Wires (Condition: 1)\n\nIf the first digit in\nthe serial is odd,\nskip to Condition 3.",
-        "3 Wires (Condition: 2)\n\nIf there is only one\nwire matching the\nmodule's color, cut\nthat matching wire.",
+        "3 Wires (Condition: 2)\n\nIf there is only one\nwire matching this\nmodule's color, cut\nthat matching wire.",
         "3 Wires (Condition: 3)\n\nIf all wires share\nthe same color, cut\nthe second wire.",
         "3 Wires (Condition: 4)\n\nIf there isn't only one\nRole Reversal module,\ncut the third wire,\nalso thanks!",
-        "3 Wires (Condition: 5)\n\nIf any warm color\ncomes before a\ncold one, cut\nthe third wire.",
+        "3 Wires (Condition: 5)\n\nIf any warm color\ncomes before a\ncold one, cut the\nlast cold wire.",
         "3 Wires (Condition: 6)\n\nIf the serial contains\nany letters found in\nthe module name,\ncut the first wire.",
         "3 Wires (Condition: 7)\n\nIf only two of the\nwires share the\nsame color, cut\nthe unique wire.",
-        "3 Wires (Condition: 8)\n\nOtherwise, cut the\nfirst wire.",
+        "3 Wires (Condition: 8)\n\nOtherwise, cut the\nsecond wire.",
 
         //26
         "4 Wires",
