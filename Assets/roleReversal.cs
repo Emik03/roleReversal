@@ -25,8 +25,6 @@ public class roleReversal : MonoBehaviour
                greenWires = new List<byte>(0), blueWires = new List<byte>(0), purpleWires = new List<byte>(0);
     List<List<byte>> wires;
 
-    //internal Manual manual = new Manual();
-
     private bool _lightsOn = false, _displayWin = false;
     private sbyte _wireSelected = 0, _correctWire = 0, _frames = 0, _instructionsIndex = 1;
     private int _moduleId = 0, _seed = 0;
@@ -156,7 +154,7 @@ public class roleReversal : MonoBehaviour
         _seed = Random.Range(0, 279936);
 
         //meme seed for thumbnail
-        //_seed = 279935;
+        _seed = 20649;
 
         //all wires together
         wires = new List<List<byte>>(6) { redWires, orangeWires, yellowWires, greenWires, blueWires, purpleWires };
@@ -260,8 +258,6 @@ public class roleReversal : MonoBehaviour
 
             //make module solved
             Module.HandlePass();
-
-            //deactivate module
             isSolved = true;
         }
 
@@ -937,12 +933,12 @@ public class roleReversal : MonoBehaviour
         B6number += System.Convert.ToString(num);
         List<char> result = B6number.Reverse().ToList();
 
+        //ensures that if the base 6 conversion yields less than 7 wires, it should add leading 0's
+        while (result.Count < 7)
+            result.Insert(0, '0');
+
         while (wireCount < result.Count)
             result.RemoveAt(result.Count - 1);
-
-        //ensures that if the base 6 conversion yields less than 7 wires, it should add leading 0's
-        while (result.Count < wireCount)
-            result.Insert(0, '0');
 
         return result;
     }
