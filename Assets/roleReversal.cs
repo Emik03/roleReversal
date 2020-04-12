@@ -154,7 +154,7 @@ public class roleReversal : MonoBehaviour
         _seed = Random.Range(0, 279936);
 
         //meme seed for thumbnail
-        _seed = 20649;
+        //_seed = 279935;
 
         //all wires together
         wires = new List<List<byte>>(6) { redWires, orangeWires, yellowWires, greenWires, blueWires, purpleWires };
