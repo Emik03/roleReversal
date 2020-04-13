@@ -156,9 +156,6 @@ public class roleReversal : MonoBehaviour
         //meme seed for thumbnail
         //_seed = 279935;
 
-        //all wires together
-        wires = new List<List<byte>>(6) { redWires, orangeWires, yellowWires, greenWires, blueWires, purpleWires };
-
         //run this method every time the screen needs to be updated
         DisplayScreen();
 
@@ -638,14 +635,14 @@ public class roleReversal : MonoBehaviour
                 byte triplets = 0;
 
                 //if 2 pairs or 1 triplet
-                for (int i = 0; i < wires.Count; i++)
+                foreach (List<byte> wire in wires)
                 {
                     //check for pairs
-                    if (wires[i].Count == 2)
+                    if (wire.Count == 2)
                         pairs++;
 
                     //check for triplets
-                    else if (wires[i].Count == 3)
+                    else if (wire.Count == 3)
                         triplets++;
                 }
 
@@ -830,6 +827,8 @@ public class roleReversal : MonoBehaviour
             }
         }
 
+        //all wires together
+        wires = new List<List<byte>>(6) { redWires, orangeWires, yellowWires, greenWires, blueWires, purpleWires };
     }
 
 
