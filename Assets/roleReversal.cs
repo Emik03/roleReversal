@@ -502,11 +502,11 @@ public class roleReversal : MonoBehaviour
                     break;
 
                 //if 7 or less modules are on the bomb
-                if (Info.GetModuleIDs().Count <= 7)
+                if (Info.GetSolvedModuleNames().Count <= 4 && Info.GetSolvedModuleNames().Count != 0)
                 {
-                    _correctWire = (sbyte)(Info.GetModuleIDs().Count + 1);
+                    _correctWire = (sbyte)Info.GetSolvedModuleNames().Count;
                     souvenir = 6;
-                    Debug.LogFormat("[Role Reversal #{0}] Condition 6 (If 7 or less modules are on the bomb): True, cut wire {1}.", _moduleId, _correctWire);
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 6 (If 4 or less modules are solved): True, cut wire {1}.", _moduleId, _correctWire);
                 }
 
                 //if first wire is a warm color
@@ -1014,7 +1014,7 @@ public class roleReversal : MonoBehaviour
         "4 Wires (Condition: 3)\n\nIf there are 4 unique\ncolored wires, cut\nthe first wire with\nvalues 1, 4, or 5.",
         "4 Wires (Condition: 4)\n\nIf less than 1 minute\nis remaining, cut\nthe first wire.",
         "4 Wires (Condition: 5)\n\nIf all wires are\nsorted, cut the first\ncold-colored or\nnon-unique wire.",
-        "4 Wires (Condition: 6)\n\nIf the bomb has 7 or\nless modules, cut the\n(module count) wire.",
+        "4 Wires (Condition: 6)\n\nIf there's 1, 2, 3, or 4\nsolved modules, cut\nwire (solved modules).",
         "4 Wires (Condition: 7)\n\nIf the first wire is\na warm color,\ncut the last warm-\ncolored wire.",
         "4 Wires (Condition: 8)\n\nOtherwise, cut the\nsecond wire.",
 
