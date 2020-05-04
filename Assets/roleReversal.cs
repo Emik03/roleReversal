@@ -33,10 +33,10 @@ public class roleReversal : MonoBehaviour
     private List<char> _convertedSeed;
 
     private char[] _displayText = new char[0];
-    private readonly string[] _completeText = new string[9] { "C", "o", "m", "p", "l", "e", "t", "e", "!" };
+    private static readonly string[] _completeText = new string[9] { "C", "o", "m", "p", "l", "e", "t", "e", "!" };
 
     private static int _moduleIdCounter = 1;
-    private static short moduleCount = 0;
+    private static short _moduleCount = 0;
 
     private Color32 mainColor = new Color32(158, 133, 245, 255);
 
@@ -45,7 +45,7 @@ public class roleReversal : MonoBehaviour
     /// </summary>
     void Start()
     {
-        moduleCount = 0;
+        _moduleCount = 0;
         _moduleId = _moduleIdCounter++;
         Module.OnActivate += Activate;
         UpdateColor();
@@ -143,11 +143,9 @@ public class roleReversal : MonoBehaviour
     /// </summary>
     private void Init()
     {
-        moduleCount++;
+        _moduleCount++;
 
         Debug.LogFormat("");
-
-        //_instructions = manual.GenerateManual();
 
         //_seed!
         //generate seed
@@ -244,7 +242,7 @@ public class roleReversal : MonoBehaviour
         CalculateAnswer();
 
         Debug.LogFormat("[Role Reversal #{0}] Time when cut: {1} seconds.", _moduleId, Info.GetTime());
-        Debug.LogFormat("[Role Reversal #{0}] Role Reversal module count: {1} on the current bomb.", _moduleId, moduleCount);
+        Debug.LogFormat("[Role Reversal #{0}] Role Reversal module count: {1} on the current bomb.", _moduleId, _moduleCount);
 
         //if the answer is correct
         if (_wireSelected + 1 == _correctWire)
@@ -382,7 +380,7 @@ public class roleReversal : MonoBehaviour
                 }
 
                 //if there is only 1 of this module
-                else if (moduleCount != 1)
+                else if (_moduleCount != 1)
                 {
                     _correctWire = 3;
                     souvenir = 4;
@@ -615,8 +613,7 @@ public class roleReversal : MonoBehaviour
                     Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If serial has a vowel): True, cut wire 6.", _moduleId);
                     break;
                 }
-
-                //Debug.LogFormat("{0} {1} {2}", _redWires.Count, _yellowWires.Count, _blueWires.Count);
+                
                 //if all primary colors exist
                 if (redWires.Count >= 1 && yellowWires.Count >= 1 && blueWires.Count >= 1)
                     for (int i = 0; i < _convertedSeed.Count; i++)
@@ -844,25 +841,6 @@ public class roleReversal : MonoBehaviour
 
         _displayText = new char[_currentText.Length];
         _displayText = _currentText.ToCharArray();
-
-        /* isn't useful anymore
-        byte searchRange = 20;
-        ushort startPos = 30;
-
-        //while it isn't outside of the array
-        while (startPos < _currentText.Length)
-        {
-            //change it to placeholder line break
-            if (_displayText[startPos] == ' ')
-            {
-                _displayText[startPos] = '§';
-                startPos += searchRange;
-            }
-
-            else
-                startPos--;
-        }
-        */
     }
 
     /// <summary>
@@ -974,15 +952,15 @@ public class roleReversal : MonoBehaviour
         "Tutorial",
 
         "On the Subject of\nRole Reversal.\n\nPress the bottom\nright button\nto continue.",
-        "This module has 7\nhidden wires. Tell\nthe expert the seed\nnumber above.",
-        "Take the seed\nmodulo 6 and add 2.\nThis number is\nthe amount of\nwires inside.",
+        "If you use the HTML\nmanual, the middle\ntile gives modulo,\nand the right base-6.",
+        "Tell the expert the\nseed number above.\nModulo the seed by 6,\nthen add 2 will be the\namount of wires.",
         "Convert the seed\ninto base-6, each\ndigit represents a\ncolored wire.",
         "If you have less\nthan 7 digits, add\n0's at the beginning\nuntil you do.",
-        "Convert digits to\ncolors using Table\nA and stop when\nyou have as many\nwires as amount of\nwires calculated.",
+        "Convert digits using\nTable A and stop\nwhen you have as many\nwires as the amount\nof wires calculated.",
         "To cut a wire,\nnavigate with the\ntop buttons, then\ncut using the\ntop screen.",
-        "Skip to the correct\nsection by pressing\nthe bottom screen.\n\nGood luck!",
+        "Cycle to the correct\nsection by pressing\nthe bottom screen.\n\nGood luck!",
 
-        //8
+        //9
         "2 Wires",
 
         "2 Wires (Condition: 1)\n\nIf the first wire\nis a secondary, skip\nto Condition 3.",
@@ -994,7 +972,7 @@ public class roleReversal : MonoBehaviour
         "2 Wires (Condition: 7)\n\nIf the first wire has\nthe higher value, cut\nthe second wire.",
         "2 Wires (Condition: 8)\n\nOtherwise, cut the\nfirst secondary-\ncolored wire.",
 
-        //17
+        //18
         "3 Wires",
 
         "3 Wires (Condition: 1)\n\nIf the first digit in\nthe serial is odd,\nskip to Condition 3.",
@@ -1006,7 +984,7 @@ public class roleReversal : MonoBehaviour
         "3 Wires (Condition: 7)\n\nIf only two of the\nwires share the\nsame color, cut\nthe unique wire.",
         "3 Wires (Condition: 8)\n\nOtherwise, cut the\nsecond wire.",
 
-        //26
+        //27
         "4 Wires",
 
         "4 Wires (Condition: 1)\n\nIf you have more\nthan 2 indicators,\nskip to Condition 3.",
@@ -1018,7 +996,7 @@ public class roleReversal : MonoBehaviour
         "4 Wires (Condition: 7)\n\nIf the first wire is\na warm color,\ncut the last warm-\ncolored wire.",
         "4 Wires (Condition: 8)\n\nOtherwise, cut the\nsecond wire.",
 
-        //35
+        //36
         "5 Wires",
 
         "5 Wires (Condition: 1)\n\nIf there are any red\nwires, skip to\nCondition 3.",
@@ -1030,7 +1008,7 @@ public class roleReversal : MonoBehaviour
         "5 Wires (Condition: 7)\n\nIf any indicators\nare off, cut the\nthird wire.",
         "5 Wires (Condition: 8)\n\nOtherwise, cut the\nsecond wire.",
 
-        //44
+        //45
         "6 Wires",
 
         "6 Wires (Condition: 1)\n\nIf the serial has\nexactly 2 digits,\nskip to Condition 3.",
@@ -1042,7 +1020,7 @@ public class roleReversal : MonoBehaviour
         "6 Wires (Condition: 7)\n\nIf the seed is even,\ncut the fifth wire.",
         "6 Wires (Condition: 8)\n\nOtherwise, cut the\nthird wire.",
 
-        //53
+        //54
         "7 Wires",
 
         "7 Wires (Condition: 1)\n\nIf there are as many\nor more lit indicators\nas unlit indicators,\nskip to Condition 3.",
@@ -1054,4 +1032,127 @@ public class roleReversal : MonoBehaviour
         "7 Wires (Condition: 7)\n\nIf the first, fourth,\nor last wire share\nany color, cut the\nfourth wire.",
         "7 Wires (Condition: 8)\n\nOtherwise, cut the\nthird wire.",
     };
+
+    /// <summary>
+    /// Determines whether the input from the TwitchPlays chat command is valid or not.
+    /// </summary>
+    /// <param name="par">The string from the user.</param>
+    private bool IsValid(string par, bool submit)
+    {
+        byte b;
+        //cut wire 1-7
+        if (submit)
+            return byte.TryParse(par, out b) && b < 8 && b != 0;
+
+        //wire 1-7 (1 is tutorial), condition 0-8 (0 is section header)
+        else
+            return char.GetNumericValue(par.ToCharArray()[0]) < 8 && char.GetNumericValue(par.ToCharArray()[0]) != 0 && par.ToCharArray()[1] == '.' && char.GetNumericValue(par.ToCharArray()[2]) < 9;
+    }
+
+#pragma warning disable 414
+    private readonly string TwitchHelpMessage = @"!{0} cut <#> (Cuts the wire '#' | valid numbers are from 1-7) !{0} manual <#>.<#> (Left digit refers to amount of wires, right digit refers to instruction count. If you don't know how this module works, do manual 1:3, manual 1:4, manual 1:5...)";
+#pragma warning restore 414
+
+    /// <summary>
+    /// TwitchPlays Compatibility, detects every chat message and clicks buttons accordingly.
+    /// </summary>
+    /// <param name="command">The twitch command made by the user.</param>
+    IEnumerator ProcessTwitchCommand(string command)
+    {
+        string[] commands = command.Split(' ');
+
+        //if command is formatted correctly
+        if (Regex.IsMatch(commands[0], @"^\s*cut\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+
+            //if command has no parameters
+            if (commands.Length < 2)
+                yield return "sendtochaterror Please specify the wire you want to cut! (Valid: 1-7)";
+
+            //if command has too many parameters
+            else if (commands.Length > 2)
+                yield return "sendtochaterror Too many wires requested! Only one can be cut at any time.";
+
+            //if command has an invalid parameter
+            else if (!IsValid(commands.ElementAt(1), true))
+                yield return "sendtochaterror Invalid number! Only wires 1-7 can be pushed.";
+
+            //if command is valid, cut wire accordingly
+            else
+            {
+                while (true)
+                {
+                    if (char.GetNumericValue(commands[1].ToCharArray()[0]) == _wireSelected + 1)
+                        break;
+
+                    btn[1].OnInteract();
+                    yield return new WaitForSeconds(0.1f);
+                }
+
+                submit.OnInteract();
+            }
+        }
+
+        //if command is formatted correctly
+        if (Regex.IsMatch(commands[0], @"^\s*manual\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+
+            //if command has no parameters
+            if (commands.Length < 2)
+                yield return "sendtochaterror Please specify the manual section you want to read! (Valid: <#>.<#>, 2-7.1-8)";
+
+            //if command has too many parameters
+            else if (commands.Length > 2)
+                yield return "sendtochaterror Too many instructions sent! Only one page can be viewed at a time.";
+
+            //if command has an invalid parameter
+            else if (!IsValid(commands.ElementAt(1), false))
+                yield return "sendtochaterror Invalid instruction! Expected: <#>.<#>, 2-7.1-8";
+
+            //if command is valid, go to section accordingly
+            else
+            {
+                while (true)
+                {
+                    if (char.GetNumericValue(commands[1].ToCharArray()[0]) == (_instructionsIndex / 9) + 1)
+                        break;
+
+                    btn[4].OnInteract();
+                    yield return new WaitForSeconds(0.1f);
+                }
+
+                while (true)
+                {
+                    if (char.GetNumericValue(commands[1].ToCharArray()[2]) == _instructionsIndex % 9)
+                        break;
+
+                    btn[3].OnInteract();
+                    yield return new WaitForSeconds(0.1f);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Force the module to be solved in TwitchPlays
+    /// </summary>
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        yield return null;
+        Debug.LogFormat("[Role Reversal #{0}] Admin has initated a forced solve...", _moduleId);
+
+        CalculateAnswer();
+        while (true)
+        {
+            if (_correctWire == _wireSelected + 1)
+                break;
+
+            btn[1].OnInteract();
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        submit.OnInteract();
+    }
 }
