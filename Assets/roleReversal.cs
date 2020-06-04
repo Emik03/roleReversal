@@ -153,6 +153,7 @@ public class roleReversal : MonoBehaviour
 
         //meme seed for thumbnail
         //_seed = 279935;
+        //_seed = 217697;
 
         //run this method every time the screen needs to be updated
         DisplayScreen();
@@ -744,13 +745,13 @@ public class roleReversal : MonoBehaviour
                     {
                         if (wires[i].Count >= 4)
                         {
-                            for (int j = wires.Count - 1; j >= 0; j++)
+                            for (int j = wires.Count - 1; j >= 0; j--)
                             {
-                                if (wires[j].Count == 1)
+                                if (wires[j].Count != 1)
                                 {
                                     _correctWire = (sbyte)(j + 1);
                                     souvenir = 6;
-                                    Debug.LogFormat("[Role Reversal #{0}] Condition 6 (If 3 or more wires share the same color): True, cut wire {1}.", _moduleId, _correctWire);
+                                    Debug.LogFormat("[Role Reversal #{0}] Condition 6 (If 4 or more wires share the same color): True, cut wire {1}.", _moduleId, _correctWire);
                                 }
                             }
                         }
