@@ -1117,22 +1117,18 @@ public class roleReversal : MonoBehaviour
             //if command is valid, go to section accordingly
             else
             {
-                while (true)
-                {
-                    if (char.GetNumericValue(commands[1].ToCharArray()[0]) == (_instructionsIndex / 9) + 1)
-                        break;
+                btn[4].OnInteract();
 
+                while (char.GetNumericValue(commands[1][0]) != (_instructionsIndex / 9) + 1)
+                {
                     btn[4].OnInteract();
-                    yield return new WaitForSeconds(0.1f);
+                    yield return new WaitForSeconds(0.02f);
                 }
 
-                while (true)
+                while (char.GetNumericValue(commands[1][2]) != _instructionsIndex % 9)
                 {
-                    if (char.GetNumericValue(commands[1].ToCharArray()[2]) == _instructionsIndex % 9)
-                        break;
-
                     btn[3].OnInteract();
-                    yield return new WaitForSeconds(0.1f);
+                    yield return new WaitForSeconds(0.02f);
                 }
             }
         }
