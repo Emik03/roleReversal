@@ -153,7 +153,7 @@ public class roleReversal : MonoBehaviour
 
         //meme seed for thumbnail
         //_seed = 279935;
-        //_seed = 217697;
+        //_seed = 122852;
 
         //run this method every time the screen needs to be updated
         DisplayScreen();
@@ -486,11 +486,11 @@ public class roleReversal : MonoBehaviour
                         for (int j = 0; j < _convertedSeed.Count; j++)
                         {
                             //if cold, or not unique
-                            if (_convertedSeed[i] >= 3 || wires[(int)char.GetNumericValue(_convertedSeed[i])].Count > 1)
+                            if (char.GetNumericValue(_convertedSeed[j]) >= 3 || wires[(int)char.GetNumericValue(_convertedSeed[j])].Count > 1)
                             {
                                 _correctWire = (sbyte)(j + 1);
                                 souvenir = 5;
-                                Debug.LogFormat("[Role Reversal #{0}] Condition 5 (If wires are sorted): True, cut wire {1}.", _moduleId, _convertedSeed);
+                                Debug.LogFormat("[Role Reversal #{0}] Condition 5 (If wires are sorted): True, cut wire {1}.", _moduleId, _correctWire);
                                 break;
                             }
                         }
@@ -657,7 +657,7 @@ public class roleReversal : MonoBehaviour
                 {
                     /*
                      * runs through the order of the wires, based on what numerical value is in each wire,
-                     * it runs through the index of _wires, which will check whether there is one member
+                     * it runs through the index of wires, which will check whether there is one member
                      * the specified color. if not, it continues through the list until it finds one.
                     */
                     for (int i = 0; i < _convertedSeed.Count; i++)
