@@ -472,6 +472,9 @@ public class roleReversal : MonoBehaviour
                     break;
                 }
 
+                if (_correctWire != 0)
+                    break;
+
                 //if all wires are sorted
                 for (int i = 0; i < _convertedSeed.Count - 1; i++)
                 {
