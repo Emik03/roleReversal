@@ -744,13 +744,13 @@ public class roleReversal : MonoBehaviour
                 else
                 {
                     //if 4 or more wires share the same color
-                    for (int i = 0; i < wires.Count; i++)
+                    for (int i = 0; i < wires.Count && _correctWire == 0; i++)
                     {
                         if (wires[i].Count >= 4)
                         {
-                            for (int j = wires.Count - 1; j >= 0; j--)
+                            for (int j = _convertedSeed.Count - 1; j >= 0 && _correctWire == 0; j--)
                             {
-                                if (wires[j].Count != 1)
+                                if (wires[(int)char.GetNumericValue(_convertedSeed[j])].Count != 1)
                                 {
                                     _correctWire = (sbyte)(j + 1);
                                     souvenir = 6;
