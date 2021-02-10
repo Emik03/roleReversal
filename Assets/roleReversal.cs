@@ -512,7 +512,7 @@ public class roleReversal : MonoBehaviour
                 }
 
                 //if first wire is a warm color
-                else if (_convertedSeed[0] == '1' || _convertedSeed[0] == '2')
+                else if (_convertedSeed[0] == '0' || _convertedSeed[0] == '1' || _convertedSeed[0] == '2')
                 {
                     for (int i = _convertedSeed.Count - 1; i >= 0; i--)
                     {
@@ -557,7 +557,11 @@ public class roleReversal : MonoBehaviour
                             Debug.LogFormat("[Role Reversal #{0}] Condition 3 (If yellow wire to the left of green wire): True, cut wire {1}.", _moduleId, _correctWire);
                             break;
                         }
+                    }
 
+
+                    for (int i = 0; i < _convertedSeed.Count - 1; i++)
+                    {
                         //if yellow wire is to the right of green wire
                         if (_convertedSeed[i] == '3' && _convertedSeed[i + 1] == '2')
                         {
