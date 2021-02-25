@@ -542,7 +542,7 @@ public class roleReversal : MonoBehaviour
                 {
                     _correctWire = (sbyte)(orangeWires[0] + 1);
                     souvenir = 2;
-                    Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If there are any orange wires): True, cut wire 1.", _moduleId, _correctWire);
+                    Debug.LogFormat("[Role Reversal #{0}] Condition 2 (If there are any orange wires): True, cut wire {1}.", _moduleId, _correctWire);
                 }
 
                 else
