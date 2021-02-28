@@ -559,6 +559,9 @@ public class roleReversal : MonoBehaviour
                         }
                     }
 
+                    //if correctWire has been set
+                    if (_correctWire != 0)
+                        break;
 
                     for (int i = 0; i < _convertedSeed.Count - 1; i++)
                     {
